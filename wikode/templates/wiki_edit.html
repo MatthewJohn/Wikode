@@ -18,4 +18,11 @@
     <input type="submit" value="{% if wiki.exists %}Save{% else %}Create{% endif %}" />
 </form>
 
+{% if wiki.exists %}
+<form action="{{ wiki.absolute_url }}" method="GET">
+
+    <input type="submit" value="Cancel" />
+</form>
+{% endif %}
+
 {% endblock %}
