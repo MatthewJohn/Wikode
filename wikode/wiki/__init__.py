@@ -1,6 +1,7 @@
 
 import os
 import glob
+import re
 
 from flask import render_template, request, redirect
 
@@ -11,18 +12,21 @@ from wikode.scm import Factory as SCMFactory
 class Wiki(object):
 
     FILE_EXTENSION = '.wikode'
+    RE_RELATIVE_PATH_PREFIX = re.compile(r"^\./", re.IGNORECASE)
+    RE_DATA_PREFIX = re.compile(r"{0}".format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
     def __init__(self, url_struct):
         self.url_struct = url_struct
         self.pages = url_struct.split('/')
         self._source = None
-        self._file_exists = None
+        self._exists = None
         self._dir_path = None
+        self._children_files = None
 
     @property
     def dir_path(self):
         if self._dir_path is None:
-            self._dir_path = os.path.join(Config.get(Config.KEYS.DATA_DIR), *self.pages, self.FILE_EXTENSION)
+            self._dir_path = os.path.join(Config.get(Config.KEYS.DATA_DIR), *self.pages)
         return self._dir_path
 
     @property
@@ -30,14 +34,18 @@ class Wiki(object):
         return self.dir_path + self.FILE_EXTENSION
 
     @property
-    def file_exists(self):
-        if self._file_exists is None:
-            self._file_exists = os.path.exists(self.file_path)
-        return self._file_exists
+    def exists(self):
+        if self._exists is None:
+            self._exists = os.path.exists(self.file_path)
+        return self._exists
 
     @property
     def absolute_url(self):
         return '/' + '/'.join(self.pages)
+
+    @property
+    def edit_button_text(self):
+        return 'Edit' if self.exists else 'Create'
 
     @property
     def breadcrumb_html(self):
@@ -49,12 +57,29 @@ class Wiki(object):
             html += '/ <a href="{0}">{1}</a>'.format(url_path, page)
         return html
 
-    def get_children(self):
-        return glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
+    @property
+    def children_files(self):
+        if self._children_files is None:
+            cs = glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
+            self._children_files = [
+                self.RE_RELATIVE_PATH_PREFIX.sub(
+                    '',
+                    self.RE_DATA_PREFIX.sub(
+                        '',
+                        c
+                    )
+                )[:-len(self.FILE_EXTENSION)]
+                for c in glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
+            ]
+        return self._children_files
+
+    @property
+    def has_children(self):
+        return len(self.children_files)
 
     @property
     def children_html(self):
-        return '<ul>' + ''.join(['<li><a href="{0}/{1}"></a>{1}</li>'.format(self.dir_path, fn) for fn in self.get_children()]) + '</ul>'
+        return '<ul>' + ''.join(['<li><a href="{0}">{0}</a></li>'.format(fn) for fn in self.children_files]) + '</ul>'
 
     def save(self, content):
         parent_path = Config.get(Config.KEYS.DATA_DIR)
@@ -83,12 +108,18 @@ class Wiki(object):
     def rendered(self):
         return self.source
 
+    @property
+    def is_reserved(self):
+        return os.path.isfile(self.dir_path) or '/.' in self.url_struct or '..' in self.url_struct
+
     @staticmethod
     def serve_wiki_page(url_struct):
         wiki = Wiki(url_struct)
 
-        edit_mode = request.args.get('edit', False) or not wiki.exists
-        if edit_mode:
+        if wiki.is_reserved:
+            return render_template('wiki_reserved.html', wiki=wiki)
+
+        if request.args.get('edit', False):
             return render_template('wiki_edit.html', wiki=wiki)
 
         return render_template('wiki.html', wiki=wiki)
@@ -100,7 +131,6 @@ class Wiki(object):
         if wiki_content is not None:
             wiki.save(wiki_content)
 
-        if SCMFactory.get_scm().is_set():
-            SCMFactory.get_scm().commit(wiki)
+        SCMFactory.get_scm().commit(wiki)
 
         return redirect(wiki.absolute_url, code=302)

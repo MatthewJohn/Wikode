@@ -9,7 +9,8 @@
 <br />
 <br />
 
-{% if wiki.is_dir %}
+{% if wiki.has_children %}
+
 <h3>Children</h3>
 {{ wiki.children_html | safe }}
 
@@ -17,3 +18,8 @@
 {{ wiki.rendered | safe}}
 
 {% endif %}
+
+<form method="get" action="{{ wiki.edit_url }}">
+<input type="hidden" name="edit" value="1" />
+<input type="submit" value="{{ wiki.edit_button_text }}" />
+</form>
