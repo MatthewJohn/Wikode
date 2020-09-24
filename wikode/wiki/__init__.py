@@ -16,24 +16,24 @@ class Wiki(object):
         self.url_struct = url_struct
         self.pages = url_struct.split('/')
         self._source = None
-        self._exists = None
-        self._path = None
+        self._file_exists = None
+        self._dir_path = None
 
     @property
-    def path(self):
-        if self._path is None:
-            self._path = os.path.join(Config.get(Config.KEYS.DATA_DIR), *self.pages)
-        return self._path
+    def dir_path(self):
+        if self._dir_path is None:
+            self._dir_path = os.path.join(Config.get(Config.KEYS.DATA_DIR), *self.pages, self.FILE_EXTENSION)
+        return self._dir_path
 
     @property
-    def exists(self):
-        if self._exists is None:
-            self._exists = os.path.exists(self.path)
-        return self._exists
+    def file_path(self):
+        return self.dir_path + self.FILE_EXTENSION
 
     @property
-    def is_dir(self):
-        return os.path.isdir(self.path)
+    def file_exists(self):
+        if self._file_exists is None:
+            self._file_exists = os.path.exists(self.file_path)
+        return self._file_exists
 
     @property
     def absolute_url(self):
@@ -50,11 +50,11 @@ class Wiki(object):
         return html
 
     def get_children(self):
-        return glob.glob(self.path + '/*')
+        return glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
 
     @property
     def children_html(self):
-        return '<ul>' + ''.join(['<li><a href="{0}/{1}"></a>{1}</li>'.format(self.path, fn) for fn in self.get_children()]) + '</ul>'
+        return '<ul>' + ''.join(['<li><a href="{0}/{1}"></a>{1}</li>'.format(self.dir_path, fn) for fn in self.get_children()]) + '</ul>'
 
     def save(self, content):
         parent_path = Config.get(Config.KEYS.DATA_DIR)
@@ -66,14 +66,14 @@ class Wiki(object):
                 os.mkdir(parent_path)
 
         # Write file
-        with open(self.path, 'w') as fh:
+        with open(self.file_path, 'w') as fh:
             fh.write(content)
 
     @property
     def source(self):
         if self._source is None:
             if self.exists:
-                with open(self.path, 'r') as fh:
+                with open(self.file_path, 'r') as fh:
                     self._source = fh.read()
             else:
                 self._source = ''
