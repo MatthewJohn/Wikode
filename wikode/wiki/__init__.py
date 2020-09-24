@@ -17,6 +17,9 @@ class Wiki(object):
 
     WIKI_RE__NEW_LINE = re.compile(r'\n')
     WIKI_RE__LINK_WIKI = re.compile(r'\{\{\s+([a-zA-Z0-9_\-/]+)\s+\}\}')
+    WIKI_RE__BOLD = re.compile(r'\*\*(.*?)\*\*')
+    WIKI_RE__ITALICS = re.compile(r'__(.*?)__')
+    WIKI_RE__DELETED = re.compile(r'~(.*?)~')
 
     def __init__(self, url_struct):
         self.url_struct = url_struct
@@ -112,6 +115,9 @@ class Wiki(object):
         rendered = self.source
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />', rendered)
         rendered = self.WIKI_RE__LINK_WIKI.sub(r'<a href="\1">\1</a>', rendered)
+        rendered = self.WIKI_RE__BOLD.sub(r'<b>\1</b>', rendered)
+        rendered = self.WIKI_RE__ITALICS.sub(r'<i>\1</i>', rendered)
+        rendered = self.WIKI_RE__DELETED.sub(r'<del>\1</del>', rendered)
         return rendered
 
     @property
