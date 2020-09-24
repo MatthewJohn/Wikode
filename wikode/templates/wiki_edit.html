@@ -1,0 +1,11 @@
+
+
+{%for page in pages%} / <a href="#">{{page}}</a>{% endfor %}
+
+{% if not exists %}
+<h3>This page does not exist</h3>
+
+{% endif %}
+
+<textarea name="wiki_content">{{wiki_content}}</textarea>
+<input type="submit" value="{% if exists %}Save{% else %}Create{% endif %}" />
