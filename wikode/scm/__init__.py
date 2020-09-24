@@ -4,14 +4,14 @@ import os
 from wikode.config import Config
 
 
-class SCM(object):
+class Factory(object):
 
     @staticmethod
     def is_initialised():
         return Config.get(Config.KEYS.SCM_TYPE) != Config.get_default(Config.KEYS.SCM_TYPE)
 
     @staticmethod
-    def Initialise():
+    def initialise():
         if SCM.is_initialised():
             print("SCM SET")
         else:
@@ -21,3 +21,27 @@ class SCM(object):
         data_dir = Config.get(Config.KEYS.DATA_DIR)
         if not os.path.isdir(data_dir):
             os.mkdir(data_dir)
+
+
+class Base(object):
+
+    def setup(self):
+        raise NotImplementedError()
+
+    def sync(self):
+        raise NotImplementedError()
+
+    def commit(self, wiki_obj):
+        raise NotImplementedError()
+
+
+class Fake(Base):
+
+    def setup(self):
+        pass
+
+    def sync(self):
+        pass
+
+    def commit(self, wiki_obj):
+        pass

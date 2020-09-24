@@ -1,11 +1,11 @@
 
 
-{%for page in pages%} / <a href="#">{{page}}</a>{% endfor %}
+{%for page in wiki.pages%} / <a href="#">{{page}}</a>{% endfor %}
 
-{% if not exists %}
+{% if not wiki.exists %}
 <h3>This page does not exist</h3>
 
 {% endif %}
 
-{{ wiki_content }}
+{{ wiki.rendered }}
 

@@ -16,9 +16,9 @@ class Server(object):
         self._register_flask_components()
 
     def run(self):
-        SCM.Initialise()
+        SCM.initialise()
         self._flask.run(self._host, self._port)
 
     def _register_flask_components(self):
-        self._flask.route('/<path:url_struct>')(Wiki.serve_wiki_page)
-
+        self._flask.route('/<path:url_struct>', methods=['GET'])(Wiki.serve_wiki_page)
+        self._flask.route('/<path:url_struct>', methods=['POST'])(Wiki.page_post)
