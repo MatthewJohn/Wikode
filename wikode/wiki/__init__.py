@@ -15,6 +15,9 @@ class Wiki(object):
     RE_RELATIVE_PATH_PREFIX = re.compile(r"^\./", re.IGNORECASE)
     RE_DATA_PREFIX = re.compile(r"{0}".format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
+    WIKI_RE__NEW_LINE = re.compile(r'\n')
+    WIKI_RE__LINK_WIKI = re.compile(r'\{\{\s+([a-zA-Z0-9_\-/]+)\s+\}\}')
+
     def __init__(self, url_struct):
         self.url_struct = url_struct
         self.pages = url_struct.split('/')
@@ -106,7 +109,10 @@ class Wiki(object):
 
     @property
     def rendered(self):
-        return self.source
+        rendered = self.source
+        rendered = self.WIKI_RE__NEW_LINE.sub('<br />', rendered)
+        rendered = self.WIKI_RE__LINK_WIKI.sub(r'<a href="\1">\1</a>', rendered)
+        return rendered
 
     @property
     def is_reserved(self):
