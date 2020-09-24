@@ -1,11 +1,19 @@
 
 
-{%for page in wiki.pages%} / <a href="#">{{page}}</a>{% endfor %}
+{{ wiki.breadcrumb_html | safe }}
 
 {% if not wiki.exists %}
 <h3>This page does not exist</h3>
 
 {% endif %}
+<br />
+<br />
 
-{{ wiki.rendered }}
+{% if wiki.is_dir %}
+<h3>Children</h3>
+{{ wiki.children_html | safe }}
 
+{% else %}
+{{ wiki.rendered | safe}}
+
+{% endif %}

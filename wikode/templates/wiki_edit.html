@@ -1,6 +1,6 @@
 
 
-{%for page in wiki.pages%} / <a href="#">{{page}}</a>{% endfor %}
+{{ wiki.breadcrumb_html | safe }}
 
 {% if not wiki.exists %}
 <h3>This page does not exist</h3>
@@ -8,6 +8,6 @@
 {% endif %}
 
 <form action="{{ wiki.absolute_url }}" method="POST">
-    <textarea name="source">{{wiki.source}}</textarea>
+    <textarea name="source">{{wiki.source | safe}}</textarea>
     <input type="submit" value="{% if wiki.exists %}Save{% else %}Create{% endif %}" />
 </form>

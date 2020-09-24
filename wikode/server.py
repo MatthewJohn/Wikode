@@ -1,7 +1,7 @@
 
 
 from flask import Flask
-from wikode.scm import SCM
+from wikode.scm import Factory as SCMFactory
 from wikode.wiki import Wiki
 
 
@@ -16,7 +16,7 @@ class Server(object):
         self._register_flask_components()
 
     def run(self):
-        SCM.initialise()
+        SCMFactory.initialise()
         self._flask.run(self._host, self._port)
 
     def _register_flask_components(self):

@@ -11,8 +11,12 @@ class Factory(object):
         return Config.get(Config.KEYS.SCM_TYPE) != Config.get_default(Config.KEYS.SCM_TYPE)
 
     @staticmethod
+    def get_scm():
+        return Fake()
+
+    @staticmethod
     def initialise():
-        if SCM.is_initialised():
+        if Factory.is_initialised():
             print("SCM SET")
         else:
             print("SCM NOT SELECTED")
