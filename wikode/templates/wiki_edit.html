@@ -1,4 +1,6 @@
+{% extends 'main.html' %}
 
+{% block content %}
 
 {{ wiki.breadcrumb_html | safe }}
 
@@ -7,7 +9,13 @@
 
 {% endif %}
 
+
+
 <form action="{{ wiki.absolute_url }}" method="POST">
-    <textarea name="source">{{wiki.source | safe}}</textarea>
+    <textarea name="source" rows=20 cols=100>{{wiki.source | safe}}</textarea>
+    <br />
+    <br />
     <input type="submit" value="{% if wiki.exists %}Save{% else %}Create{% endif %}" />
 </form>
+
+{% endblock %}
