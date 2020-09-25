@@ -127,8 +127,8 @@ class Wiki(object):
     def rendered(self):
         rendered = self.source
 
+        # PREFORMAT  - MUST BE BEFORE ANY OTHER REPLACEMENTS
         preformat_strings = {}
-
         def replace_preformat(m):
             random_value = (
                 'WIKOD_PH_START_' +
@@ -147,15 +147,18 @@ class Wiki(object):
         rendered = self.WIKI_RE__ITALICS.sub(r'<i>\1</i>', rendered)
         rendered = self.WIKI_RE__DELETED.sub(r'<del>\1</del>', rendered)
 
-        # FULL LINE REPLACEMENT
+        # FULL LINE REPLACEMENT - must be before NEW LINE REPLACEMENT
         def replace_header(m):
             header_size = len(m.group(1))
             return '<h{0}>{1}</h{0}>'.format(header_size, m.group(2))
         rendered = self.WIKI_RE__HEADER.sub(replace_header, rendered)
 
+
+        # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />', rendered)
 
-        # Re-add preformat placeholders
+
+        # Re-add preformat placeholders - MUST BE AT END
         for preformat_placeholder in preformat_strings:
             rendered = rendered.replace(
                 preformat_placeholder,
