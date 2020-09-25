@@ -7,11 +7,9 @@ class Admin(object):
     URL = '/admin'
 
     @staticmethod
-    def serve_page():
-        if request.method == 'POST':
-            return Admin.page_post()
+    def admin_get():
         return render_template('admin.html')
 
     @staticmethod
-    def page_post():
+    def admin_post():
         return redirect(Admin.URL)

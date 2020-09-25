@@ -77,6 +77,11 @@ a {
     margin-top: 5px;
 }
 
+#searchBox {
+    float: right;
+    height: 40px;
+}
+
 </style>
 
 </head>
@@ -84,9 +89,16 @@ a {
 <body>
 
 <div id="header">
+    <div id="searchBox">
+        <form method="post" action="/search">
+            <input type="text" name="search_string" />
+            <input type="submit" class="inputButton" value="Search" />
+        </form>
+    </div>
     <div id="logo">
         <object data="/static/default-monochrome-white.svg" type="image/svg+xml" height=30></object>
     </div>
+
     <ul class="menu">
         <li><a href="/">Wiki</a></li>
         <li><a href="#">Index</a></li>
