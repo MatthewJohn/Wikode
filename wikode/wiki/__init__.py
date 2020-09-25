@@ -2,6 +2,8 @@
 import os
 import glob
 import re
+import random
+import string
 
 from flask import render_template, request, redirect
 
@@ -12,6 +14,10 @@ from wikode.scm import Factory as SCMFactory
 class Wiki(object):
 
     FILE_EXTENSION = '.wikode'
+
+    PLACEHOLDER_LETTERS = string.ascii_lowercase + string.ascii_uppercase
+    PLACEHOLDER_LENGTH = 32
+
     RE_RELATIVE_PATH_PREFIX = re.compile(r"^\./", re.IGNORECASE)
     RE_DATA_PREFIX = re.compile(r"{0}".format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
@@ -121,7 +127,20 @@ class Wiki(object):
     def rendered(self):
         rendered = self.source
 
-        rendered = self.WIKI_RE__PREFORMATTED.sub(r'<pre>\1</pre>', rendered)
+        preformat_strings = {}
+
+        def replace_preformat(m):
+            random_value = (
+                'WIKOD_PH_START_' +
+                ''.join(
+                    random.choice(Wiki.PLACEHOLDER_LETTERS)
+                    for i in range(Wiki.PLACEHOLDER_LENGTH)
+                ) +
+                '_WIKOD_PH_END'
+            )
+            preformat_strings[random_value] = m.group(1)
+            return random_value
+        rendered = self.WIKI_RE__PREFORMATTED.sub(replace_preformat, rendered)
 
         rendered = self.WIKI_RE__LINK_WIKI.sub(r'<a href="\1">\1</a>', rendered)
         rendered = self.WIKI_RE__BOLD.sub(r'<b>\1</b>', rendered)
@@ -136,11 +155,20 @@ class Wiki(object):
 
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />', rendered)
 
+        # Re-add preformat placeholders
+        for preformat_placeholder in preformat_strings:
+            rendered = rendered.replace(
+                preformat_placeholder,
+                '<pre>' + preformat_strings[preformat_placeholder] + '</pre>'
+            )
+
         return rendered
 
     @property
     def is_reserved(self):
-        return os.path.isfile(self.dir_path) or '/.' in self.url_struct or '..' in self.url_struct
+        return (os.path.isfile(self.dir_path) or
+                '/.' in self.url_struct or
+                '..' in self.url_struct)
 
     @staticmethod
     def serve_wiki_page(url_struct):
