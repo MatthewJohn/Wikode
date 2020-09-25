@@ -107,7 +107,6 @@ class Wiki(object):
             # Sort list of children
             self._children_files = sorted(res)
 
-
         return self._children_files
 
     @property
