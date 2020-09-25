@@ -15,13 +15,12 @@
     <textarea name="source" rows=20 cols=100>{{wiki.source | safe}}</textarea>
     <br />
     <br />
-    <input type="submit" value="{% if wiki.exists %}Save{% else %}Create{% endif %}" />
+    <input class="inputButton" type="submit" value="{% if wiki.exists %}Save{% else %}Create{% endif %}" />
 </form>
 
 {% if wiki.exists %}
 <form action="{{ wiki.absolute_url }}" method="GET">
-
-    <input type="submit" value="Cancel" />
+    <input class="inputButton" type="submit" value="Cancel" />
 </form>
 {% endif %}
 
