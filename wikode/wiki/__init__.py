@@ -75,22 +75,39 @@ class Wiki(object):
 
     @staticmethod
     def filename_to_url(path):
-        return Wiki.RE_RELATIVE_PATH_PREFIX.sub(
+        path = Wiki.RE_RELATIVE_PATH_PREFIX.sub(
             '',
             Wiki.RE_DATA_PREFIX.sub(
                 '',
                 path
             )
-        )[:-len(Wiki.FILE_EXTENSION)]
+        )
+        if path.endswith(Wiki.FILE_EXTENSION):
+            path = path[:-len(Wiki.FILE_EXTENSION)]
+        return path
 
     @property
     def children_files(self):
         if self._children_files is None:
-            cs = glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
+            # List all files in dir
+            cs = glob.glob(self.dir_path + '/*')
+            for c in cs:
+                # Remove file if not a directory or doesn't a valid
+                # wiki extension
+                if not c.endswith(Wiki.FILE_EXTENSION) and not os.path.isdir(c):
+                    cs.remove(c)
+            # Convert paths to urls
             self._children_files = [
                 Wiki.filename_to_url(c)
-                for c in glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
+                for c in cs
             ]
+            # Remove any duplicates
+            res = []
+            [res.append(c) for c in self._children_files if c not in res]
+            # Sort list of children
+            self._children_files = sorted(res)
+
+
         return self._children_files
 
     @property
