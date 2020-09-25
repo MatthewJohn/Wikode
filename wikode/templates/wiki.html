@@ -12,21 +12,22 @@
 <br />
 <br />
 
-{% if wiki.has_children %}
-
-<h3>Children</h3>
-{{ wiki.children_html | safe }}
-
-{% else %}
-
 <div id="wiki_content">
 {{ wiki.rendered | safe}}
 </div>
-
-{% endif %}
 
 <form method="get" action="{{ wiki.edit_url }}">
 <input type="hidden" name="edit" value="1" />
 <input type="submit" value="{{ wiki.edit_button_text }}" />
 </form>
+
+{% if wiki.has_children %}
+
+<h3>Children</h3>
+
+{{ wiki.children_html | safe }}
+
+{% endif %}
+
+
 {% endblock %}
