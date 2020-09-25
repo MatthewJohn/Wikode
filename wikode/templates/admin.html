@@ -1,0 +1,31 @@
+{% extends 'main.html' %}
+
+
+{% block content %}
+
+<form method="post">
+
+    <table style="padding: 20px; border-width: 0px;">
+        <tr>
+            <td>SCM Type</td>
+            <td>
+                <select name="">
+                    <option value="none">None</option>
+                    <option value="GIT">Git</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>SQLite DB Path</td>
+            <td><input type="text" name="sqlite_path" /></td>
+        </tr>
+        <tr>
+            <td>
+                <input type="submit" value="Save" />
+            </td>
+        </tr>
+    </table>
+</form>
+
+
+{% endblock %}
