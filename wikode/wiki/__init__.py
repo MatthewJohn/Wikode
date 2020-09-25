@@ -18,8 +18,8 @@ class Wiki(object):
     PLACEHOLDER_LETTERS = string.ascii_lowercase + string.ascii_uppercase
     PLACEHOLDER_LENGTH = 32
 
-    RE_RELATIVE_PATH_PREFIX = re.compile(r"^\./", re.IGNORECASE)
-    RE_DATA_PREFIX = re.compile(r"{0}".format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
+    RE_RELATIVE_PATH_PREFIX = re.compile(r'^\./', re.IGNORECASE)
+    RE_DATA_PREFIX = re.compile(r'{0}'.format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
     WIKI_RE__NEW_LINE = re.compile(r'\n')
     WIKI_RE__LINK_WIKI = re.compile(r'\[\[([a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
