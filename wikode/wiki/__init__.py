@@ -65,13 +65,13 @@ class Wiki(object):
 
     @property
     def breadcrumb_html(self):
-        html = ''
+        html = '<a href="/">Wiki</a> '
         url_path = ''
 
         for page in self.pages:
             url_path += '/{0}'.format(page)
             html += '/ <a href="{0}">{1}</a>'.format(url_path, page)
-        return html
+        return '<div id="breadcrumb">' + html + '</div>'
 
     @staticmethod
     def filename_to_url(path):
