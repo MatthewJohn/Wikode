@@ -18,7 +18,10 @@
 {{ wiki.children_html | safe }}
 
 {% else %}
+
+<div id="wiki_content">
 {{ wiki.rendered | safe}}
+</div>
 
 {% endif %}
 
