@@ -14,11 +14,15 @@ class Config(object):
         SCM_TYPE = 'SCM_TYPE'
         DATA_DIR = 'DATA_DIR'
         SQLITE_PATH = 'SQLITE_PATH'
+        LISTEN_HOST = 'LISTEN_HOST'
+        LISTEN_PORT = 'LISTEN_PORT'
 
     DEFAULTS = {
         KEYS.SCM_TYPE: None,
         KEYS.DATA_DIR: './data',
-        KEYS.SQLITE_PATH: './db.sqlite'
+        KEYS.SQLITE_PATH: './db.sqlite',
+        KEYS.LISTEN_HOST: '127.0.0.1',
+        KEYS.LISTEN_PORT: 5000
     }
 
     @staticmethod
