@@ -27,7 +27,7 @@ class Server(object):
         self._flask.route('/', methods=['GET'])(WikiFactory.serve_wiki_page)
         self._flask.route('/', methods=['POST'])(WikiFactory.page_post)
 
-        self._flask.route('/admin', methods=['GET', 'POST'])(AdminPage.serve_page)
+        self._flask.route(AdminPage.URL, methods=['GET', 'POST'])(AdminPage.serve_page)
         
         self._flask.route('/<path:url_struct>', methods=['GET'])(WikiFactory.serve_wiki_page)
         self._flask.route('/<path:url_struct>', methods=['POST'])(WikiFactory.page_post)
