@@ -18,7 +18,8 @@ class Server(object):
         self._register_flask_components()
 
     def run(self):
-        Indexer().initialise_database()
+        if Indexer().initialise_database():
+            WikiFactory.reindex_all_files()
         SCMFactory.initialise()
         self._flask.run(
             host=Config.get(Config.KEYS.LISTEN_HOST),

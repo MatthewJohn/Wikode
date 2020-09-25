@@ -6,7 +6,6 @@ import os
 from flask import request, render_template
 
 from wikode.config import Config
-from wikode.wiki import Wiki
 
 
 class DatabaseFactory(object):
@@ -49,7 +48,8 @@ class Indexer(object):
                     CREATE VIRTUAL TABLE wiki
                     USING FTS5(url, file, content);
                 """)
-                self.reindex_all_files()
+                return True
+        return False
 
     def search(self, search_string):
         with DatabaseFactory.sql_connect() as db:
@@ -60,7 +60,8 @@ class Indexer(object):
             print(r)
             return [i[0] for i in r]
 
-    def index_file(self, wiki):
+    @staticmethod
+    def index_file(wiki):
         print('Indexing file: {0}'.format(wiki.url_struct))
         with DatabaseFactory.sql_connect() as db:
             c = db.cursor()
@@ -69,14 +70,6 @@ class Indexer(object):
                 """INSERT INTO wiki(file, url, content) VALUES(?, ?, ?)""",
                 (wiki.file_path, wiki.url_struct, wiki.rendered))
             db.commit()
-
-    def reindex_all_files(self):
-        for f in glob.glob(os.path.join(
-                    Config.get(Config.KEYS.DATA_DIR),
-                    '**/*' + Wiki.FILE_EXTENSION),
-                recursive=True):
-            wiki = Wiki(Wiki.filename_to_url(f))
-            self.index_file(wiki)
 
 
 class SearchPage(object):

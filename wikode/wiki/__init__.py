@@ -8,6 +8,7 @@ import string
 from flask import render_template, request, redirect
 
 from wikode.config import Config
+from wikode.indexer import Indexer
 
 
 class Wiki(object):
@@ -130,6 +131,13 @@ class Wiki(object):
         # Write file
         with open(self.file_path, 'w') as fh:
             fh.write(content)
+
+        # Re-index file
+        self.index()
+
+    def index(self):
+        """Add/re-add file to search index."""
+        Indexer.index_file(self)
 
     @property
     def source(self):
