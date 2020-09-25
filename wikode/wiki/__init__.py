@@ -65,12 +65,12 @@ class Wiki(object):
 
     @property
     def breadcrumb_html(self):
-        html = '<a href="/">Wiki</a> '
+        html = '<a href="/">Wiki</a> :'
         url_path = ''
 
         for page in self.pages:
             url_path += '/{0}'.format(page)
-            html += '/ <a href="{0}">{1}</a>'.format(url_path, page)
+            html += ' / <a href="{0}">{1}</a>'.format(url_path, page)
         return '<div id="breadcrumb">' + html + '</div>'
 
     @staticmethod
@@ -175,7 +175,8 @@ class Wiki(object):
     def is_reserved(self):
         return (os.path.isfile(self.dir_path) or
                 '/.' in self.url_struct or
-                '..' in self.url_struct)
+                '..' in self.url_struct or
+                self.url_struct.startswith('.'))
 
 
 class DefaultWikiPage(Wiki):
