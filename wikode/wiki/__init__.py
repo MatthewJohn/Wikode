@@ -22,6 +22,8 @@ class Wiki(object):
     WIKI_RE__DELETED = re.compile(r'~(.*?)~')
     WIKI_RE__PREFORMATTED = re.compile(r'\{\{\{(.+?)\}\}\}', re.DOTALL | re.MULTILINE)
 
+    WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
+
     def __init__(self, url_struct):
         self.url_struct = url_struct
         self.pages = url_struct.split('/')
@@ -64,18 +66,22 @@ class Wiki(object):
             html += '/ <a href="{0}">{1}</a>'.format(url_path, page)
         return html
 
+    @staticmethod
+    def filename_to_url(path):
+        return Wiki.RE_RELATIVE_PATH_PREFIX.sub(
+            '',
+            Wiki.RE_DATA_PREFIX.sub(
+                '',
+                path
+            )
+        )[:-len(Wiki.FILE_EXTENSION)]
+
     @property
     def children_files(self):
         if self._children_files is None:
             cs = glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
             self._children_files = [
-                self.RE_RELATIVE_PATH_PREFIX.sub(
-                    '',
-                    self.RE_DATA_PREFIX.sub(
-                        '',
-                        c
-                    )
-                )[:-len(self.FILE_EXTENSION)]
+                Wiki.filename_to_url(c)
                 for c in glob.glob(self.dir_path + '/*{0}'.format(self.FILE_EXTENSION))
             ]
         return self._children_files
@@ -114,12 +120,22 @@ class Wiki(object):
     @property
     def rendered(self):
         rendered = self.source
-        rendered = self.WIKI_RE__NEW_LINE.sub('<br />', rendered)
+
         rendered = self.WIKI_RE__PREFORMATTED.sub(r'<pre>\1</pre>', rendered)
+
         rendered = self.WIKI_RE__LINK_WIKI.sub(r'<a href="\1">\1</a>', rendered)
         rendered = self.WIKI_RE__BOLD.sub(r'<b>\1</b>', rendered)
         rendered = self.WIKI_RE__ITALICS.sub(r'<i>\1</i>', rendered)
         rendered = self.WIKI_RE__DELETED.sub(r'<del>\1</del>', rendered)
+
+        # FULL LINE REPLACEMENT
+        def replace_header(m):
+            header_size = len(m.group(1))
+            return '<h{0}>{1}</h{0}>'.format(header_size, m.group(2))
+        rendered = self.WIKI_RE__HEADER.sub(replace_header, rendered)
+
+        rendered = self.WIKI_RE__NEW_LINE.sub('<br />', rendered)
+
         return rendered
 
     @property
