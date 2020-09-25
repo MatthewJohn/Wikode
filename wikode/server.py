@@ -4,7 +4,7 @@ from flask import Flask
 
 from wikode.config import Config
 from wikode.scm import Factory as SCMFactory
-from wikode.wiki import Wiki
+from wikode.wiki import Factory as WikiFactory
 
 
 class Server(object):
@@ -23,5 +23,7 @@ class Server(object):
         )
 
     def _register_flask_components(self):
-        self._flask.route('/<path:url_struct>', methods=['GET'])(Wiki.serve_wiki_page)
-        self._flask.route('/<path:url_struct>', methods=['POST'])(Wiki.page_post)
+        self._flask.route('/', methods=['GET'])(WikiFactory.serve_wiki_page)
+        self._flask.route('/', methods=['POST'])(WikiFactory.page_post)
+        self._flask.route('/<path:url_struct>', methods=['GET'])(WikiFactory.serve_wiki_page)
+        self._flask.route('/<path:url_struct>', methods=['POST'])(WikiFactory.page_post)

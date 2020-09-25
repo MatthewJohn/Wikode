@@ -177,9 +177,26 @@ class Wiki(object):
                 '/.' in self.url_struct or
                 '..' in self.url_struct)
 
+
+class DefaultWikiPage(Wiki):
+
+    DEFAULT_WIKI_NAME = 'index'
+
+    def __init__(self):
+        super(DefaultWikiPage, self).__init__(self.DEFAULT_WIKI_NAME)
+        self.pages = []
+
+    @property
+    def file_path(self):
+        return self.dir_path + self.DEFAULT_WIKI_NAME + self.FILE_EXTENSION
+
+
+class Factory(object):
+
     @staticmethod
-    def serve_wiki_page(url_struct):
-        wiki = Wiki(url_struct)
+    def serve_wiki_page(url_struct=None):
+
+        wiki = DefaultWikiPage() if url_struct is None else Wiki(url_struct)
 
         if wiki.is_reserved:
             return render_template('wiki_reserved.html', wiki=wiki)
@@ -190,8 +207,10 @@ class Wiki(object):
         return render_template('wiki.html', wiki=wiki)
 
     @staticmethod
-    def page_post(url_struct):
-        wiki = Wiki(url_struct)
+    def page_post(url_struct=None):
+
+        wiki = DefaultWikiPage() if url_struct is None else Wiki(url_struct)
+
         wiki_content = request.form.get('source', None)
         if wiki_content is not None:
             wiki.save(wiki_content)
