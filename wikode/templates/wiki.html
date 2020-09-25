@@ -12,21 +12,7 @@
 <br />
 <br />
 
-<script>
-function goto_edit_page()
-{
-    var appendature = '';
-    if (window.location.href.indexOf('?') === -1) {
-        appendature = '?';
-    } else {
-        appendature = '&';
-    }
-    window.location.href = window.location.href + appendature + 'edit=1';
-
-}
-</script>
-
-<div id="wiki_content" ondblclick="goto_edit_page();">
+<div id="wiki_content">
 {{ wiki.rendered | safe}}
 </div>
 
