@@ -1,0 +1,15 @@
+{% extends 'main.html' %}
+
+
+{% block content %}
+
+<table>
+    {% for row in results %}
+    <tr>
+        <td><a href="{{ row }}">{{ row }}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+{% endblock %}
