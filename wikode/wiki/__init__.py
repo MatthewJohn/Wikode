@@ -22,7 +22,8 @@ class Wiki(object):
     RE_DATA_PREFIX = re.compile(r"{0}".format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
     WIKI_RE__NEW_LINE = re.compile(r'\n')
-    WIKI_RE__LINK_WIKI = re.compile(r'\{\{\s+([a-zA-Z0-9_\-/]+)\s+\}\}')
+    WIKI_RE__LINK_WIKI = re.compile(r'\[\[([a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
+    WIKI_RE__LINK_EXTERNAL = re.compile(r'\[\[(https?\://[a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
     WIKI_RE__BOLD = re.compile(r'\*\*(.*?)\*\*')
     WIKI_RE__ITALICS = re.compile(r'__(.*?)__')
     WIKI_RE__DELETED = re.compile(r'~(.*?)~')
@@ -142,7 +143,10 @@ class Wiki(object):
             return random_value
         rendered = self.WIKI_RE__PREFORMATTED.sub(replace_preformat, rendered)
 
-        rendered = self.WIKI_RE__LINK_WIKI.sub(r'<a href="\1">\1</a>', rendered)
+        def replace_link(m):
+            return '<a href="{0}">{1}</a>'.format(m.group(1), m.group(2) if m.group(2) else m.group(1))
+        rendered = self.WIKI_RE__LINK_WIKI.sub(replace_link, rendered)
+        rendered = self.WIKI_RE__LINK_EXTERNAL.sub(replace_link, rendered)
         rendered = self.WIKI_RE__BOLD.sub(r'<b>\1</b>', rendered)
         rendered = self.WIKI_RE__ITALICS.sub(r'<i>\1</i>', rendered)
         rendered = self.WIKI_RE__DELETED.sub(r'<del>\1</del>', rendered)
