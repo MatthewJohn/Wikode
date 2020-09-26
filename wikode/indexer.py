@@ -80,4 +80,5 @@ class SearchPage(object):
     def search_post():
         search_string = request.form.get('search_string', '')
         res = Indexer().search(search_string)
-        return render_template('search.html', results=res)
+        return render_template(
+            'search.html', results=res, search_query=search_string)

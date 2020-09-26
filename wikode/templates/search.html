@@ -3,6 +3,8 @@
 
 {% block content %}
 
+<h3>Results for: {{ search_query }}</h3>
+
 <table>
     {% for row in results %}
     <tr>
@@ -10,6 +12,11 @@
     </tr>
     {% endfor %}
 </table>
+
+{% if not results %}
+<h2>No results found</h2>
+
+{% endif %}
 
 
 {% endblock %}
