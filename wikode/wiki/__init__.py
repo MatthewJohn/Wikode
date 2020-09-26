@@ -37,6 +37,10 @@ class Wiki(object):
         r'((?:^ *\*+ [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
+    WIKI_RE__LIST = re.compile(
+        r'((?:^ *1\. [^\n]+$\n)+)',
+        re.DOTALL | re.MULTILINE)
+
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
 
     def __init__(self, url_struct):
@@ -207,6 +211,16 @@ class Wiki(object):
 
             return '<ul>' + ''.join(lines) + '</ul>'
         rendered = self.WIKI_RE__BULLET.sub(replace_bullet, rendered)
+
+        def replace_list(m):
+            lines = []
+            for line in m.group(1).split('\n'):
+                line = re.sub(r'^\s*1\.', '<li>', line)
+                line = re.sub(r'$', '</li>', line)
+                lines.append(line)
+
+            return '<ol>' + ''.join(lines) + '</ol>'
+        rendered = self.WIKI_RE__LIST.sub(replace_list, rendered)
 
         # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />\n', rendered)
