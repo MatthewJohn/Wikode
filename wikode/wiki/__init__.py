@@ -274,4 +274,3 @@ class IndexPage(Wiki):
             self._children_files = sorted(res)
 
         return self._children_files
->>>>>>> Stashed changes
