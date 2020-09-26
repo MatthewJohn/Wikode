@@ -32,8 +32,7 @@ class Factory(object):
         wiki_content = request.form.get('source', None)
         if wiki_content is not None:
             wiki.save(wiki_content)
-
-        SCMFactory.get_scm().commit(wiki)
+            SCMFactory.get_scm().commit(wiki)
 
         return redirect(wiki.absolute_url, code=302)
 

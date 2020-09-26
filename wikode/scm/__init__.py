@@ -114,6 +114,12 @@ class SVN(Base):
         rc, _, _ = self.run_command(['which', 'svn'], exception_on_error=False)
         return Config().scm_url and not rc
 
+    def get_auth_args(self):
+        if Config().scm_username and Config().scm_password:
+            return ['--username', Config().scm_username,
+                    '--password', Config().scm_password]
+        return []
+
     def setup(self):
         """Setup SVN repo in data directory."""
         # Clone to temporary location
@@ -126,32 +132,49 @@ class SVN(Base):
             Config().scm_url, temp_dir
         ]
 
-        if Config().scm_username and Config().scm_password:
-            cmds += ['--username', Config().scm_username,
-                     '--password', Config().scm_password]
+        cmds += self.get_auth_args()
 
         self.run_command(cmds, cwd=temp_dir)
 
         # Copy files from data directory into temporary SCM directory
         # Can't use glob in system command, since it's a bashism.
         # shutil is a pain and requires name of destination to be specified.
-        for s_file in glob.glob(Config.get(Config.KEYS.DATA_DIR) + '/*'):
+        for s_file in [n.name for n in os.scandir(Config.get(Config.KEYS.DATA_DIR))]:
             self.run_command(
                 ['cp', '-r', s_file, temp_dir + '/'],
-                cwd=os.path.abspath(
-                    os.path.join(Config.get(Config.KEYS.DATA_DIR), '..')
-                )
+                cwd=os.path.join(Config.get(Config.KEYS.DATA_DIR))
             )
             self.run_command(
                 ['svn', 'add', s_file],
                 cwd=temp_dir
             )
 
-        self.run_command('')
+        cmds = ['svn', 'commit', '--message', 'Add inital data files from Wikode']
+        cmds += self.get_auth_args()
+        self.run_command(cmds, cwd=temp_dir)
 
+        # Replace data directory with temp directory
+        shutil.rmtree(Config.get(Config.KEYS.DATA_DIR), ignore_errors=False, onerror=None)
+        shutil.move(temp_dir, Config.get(Config.KEYS.DATA_DIR))
 
     def sync(self):
-        subprocess.Popen('svn update')
+        cmds = ['svn', 'update']
+        cmds += self.get_auth_args()
+        self.run_command(cmds)
 
     def commit(self, wiki_obj):
-        pass
+
+        if wiki_obj.created:
+            file_path = wiki_obj.RE_DATA_PREFIX.sub(
+                '',
+                wiki_obj.file_path
+            )
+            if file_path.startswith('/'):
+                file_path = file_path[1:]
+            print("file to add: {0}", file_path)
+
+            cmds = ['svn', 'add', file_path]
+            self.run_command(cmds)
+        cmds = ['svn', 'commit', '-m', 'Add/updated file {0}'.format(wiki_obj.url_struct)]
+        cmds += self.get_auth_args()
+        self.run_command(cmds)

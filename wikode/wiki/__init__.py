@@ -43,6 +43,7 @@ class Wiki(object):
         self._exists = None
         self._dir_path = None
         self._children_files = None
+        self._created = False
 
     @property
     def dir_path(self):
@@ -131,12 +132,21 @@ class Wiki(object):
             if not os.path.isdir(parent_path):
                 os.mkdir(parent_path)
 
+        # If file did not previously exist, mark that
+        # the file has been created
+        if not self.exists:
+            self._created = True
+
         # Write file
         with open(self.file_path, 'w') as fh:
             fh.write(content)
 
         # Re-index file
         self.index()
+
+    @property
+    def created(self):
+        return self._created
 
     def index(self):
         """Add/re-add file to search index."""
