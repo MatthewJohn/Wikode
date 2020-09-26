@@ -12,7 +12,7 @@
 
 
 <form action="{{ wiki.absolute_url }}" method="POST">
-    <textarea name="source" rows=20 cols=100>{{wiki.source | safe}}</textarea>
+    <textarea id="wiki_editor" name="source" rows=20 cols=100>{{wiki.source | safe}}</textarea>
     <br />
     <br />
     <input class="inputButton" type="submit" value="{% if wiki.exists %}Save{% else %}Create{% endif %}" />
