@@ -173,8 +173,9 @@ class SVN(Base):
                 file_path = file_path[1:]
             print("file to add: {0}", file_path)
 
-            cmds = ['svn', 'add', file_path]
+            cmds = ['svn', 'add', '--parents', file_path]
             self.run_command(cmds)
+
         cmds = ['svn', 'commit', '-m', 'Add/updated file {0}'.format(wiki_obj.url_struct)]
         cmds += self.get_auth_args()
         self.run_command(cmds)
