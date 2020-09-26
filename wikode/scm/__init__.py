@@ -117,7 +117,8 @@ class SVN(Base):
     def get_auth_args(self):
         if Config().scm_username and Config().scm_password:
             return ['--username', Config().scm_username,
-                    '--password', Config().scm_password]
+                    '--password', Config().scm_password,
+                    '--no-auth-cache']
         return []
 
     def setup(self):
