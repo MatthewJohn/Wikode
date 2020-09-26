@@ -233,4 +233,4 @@ class DefaultWikiPage(Wiki):
 
     @property
     def file_path(self):
-        return self.dir_path + self.DEFAULT_WIKI_NAME + self.FILE_EXTENSION
+        return os.path.join(self.dir_path, + self.DEFAULT_WIKI_NAME + self.FILE_EXTENSION)
