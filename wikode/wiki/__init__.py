@@ -25,7 +25,7 @@ class Wiki(object):
     RE_DATA_PREFIX = re.compile(
         r'{0}'.format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
-    WIKI_RE__NEW_LINE = re.compile(r'\n\s*?\n', re.MULTILINE)
+    WIKI_RE__NEW_LINE = re.compile(r'\n')
     WIKI_RE__LINK_WIKI = re.compile(r'\[\[([a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
     WIKI_RE__LINK_EXTERNAL = re.compile(r'\[\[(https?\://[a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
     WIKI_RE__BOLD = re.compile(r'\*\*(.*?)\*\*')
@@ -224,7 +224,6 @@ class Wiki(object):
 
         # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />\n', rendered)
-        #rendered = rendered.replace('\n\n', '\n<br />')
 
 
         # Re-add preformat placeholders - MUST BE AT END
