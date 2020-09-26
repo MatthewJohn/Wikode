@@ -17,6 +17,7 @@ class Config(object):
         SCM_URL = 'SCM_URL'
         SCM_USERNAME = 'SCM_USERNAME'
         SCM_PASSWORD = 'SCM_PASSWORD'
+        SCM_SYNC_ON_START = 'SCM_SYNC_ON_START'
 
         DATA_DIR = 'DATA_DIR'
         SQLITE_PATH = 'SQLITE_PATH'
@@ -29,6 +30,7 @@ class Config(object):
         KEYS.SCM_URL: None,
         KEYS.SCM_USERNAME: None,
         KEYS.SCM_PASSWORD: None,
+        KEYS.SCM_SYNC_ON_START: True,
 
         KEYS.DATA_DIR: './data',
         KEYS.SQLITE_PATH: './db.sqlite',

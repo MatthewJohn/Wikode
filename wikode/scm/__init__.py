@@ -34,7 +34,7 @@ class Factory(object):
 
         if Factory.is_selected():
             scm = Factory.get_scm()
-            if scm.is_setup():
+            if scm.is_setup() and Config.get(Config.KEYS.SCM_SYNC_ON_START):
                 scm.sync()
             else:
                 print('SCM is selected but not setup')
