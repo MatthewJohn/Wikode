@@ -34,7 +34,7 @@ class Wiki(object):
     WIKI_RE__PREFORMATTED = re.compile(r'\{\{\{(.+?)\}\}\}',
                                        re.DOTALL | re.MULTILINE)
     WIKI_RE__BULLET = re.compile(
-        r'(?:^(\*)+ ([^\n]+?)$\n)+',
+        r'((?:^ *\*+ [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
@@ -199,14 +199,17 @@ class Wiki(object):
         rendered = self.WIKI_RE__HEADER.sub(replace_header, rendered)
 
         def replace_bullet(m):
-            print(m.groups())
-            bullets = m.group(1)
-            content = m.group(2)
-            return '<ul>'
+            lines = []
+            for line in m.group(1).split('\n'):
+                line = re.sub(r'^\s*\*+', '<li>', line)
+                line = re.sub(r'$', '</li>', line)
+                lines.append(line)
+
+            return '<ul>' + ''.join(lines) + '</ul>'
         rendered = self.WIKI_RE__BULLET.sub(replace_bullet, rendered)
 
         # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
-        rendered = self.WIKI_RE__NEW_LINE.sub('<br />', rendered)
+        rendered = self.WIKI_RE__NEW_LINE.sub('<br />\n', rendered)
 
 
         # Re-add preformat placeholders - MUST BE AT END
