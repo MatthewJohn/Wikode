@@ -5,16 +5,25 @@ import glob
 from flask import render_template, request, redirect
 
 from wikode.config import Config
-from wikode.wiki import Wiki, DefaultWikiPage
+from wikode.wiki import Wiki, DefaultWikiPage, IndexPage
 from wikode.scm import Factory as SCMFactory
 
 
 class Factory(object):
 
     @staticmethod
+    def get_wiki_object_from_path(url_struct):
+        if url_struct is None:
+            return DefaultWikiPage()
+        elif url_struct.lower() == 'index':
+            return IndexPage()
+        return Wiki(url_struct)
+
+
+    @staticmethod
     def serve_wiki_page(url_struct=None):
 
-        wiki = DefaultWikiPage() if url_struct is None else Wiki(url_struct)
+        wiki = Factory.get_wiki_object_from_path(url_struct)
 
         if wiki.is_reserved:
             return render_template('wiki_reserved.html', wiki=wiki)
@@ -27,7 +36,7 @@ class Factory(object):
     @staticmethod
     def page_post(url_struct=None):
 
-        wiki = DefaultWikiPage() if url_struct is None else Wiki(url_struct)
+        wiki = Factory.get_wiki_object_from_path(url_struct)
 
         wiki_content = request.form.get('source', None)
         if wiki_content is not None:

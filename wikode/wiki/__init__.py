@@ -15,6 +15,9 @@ class Wiki(object):
 
     FILE_EXTENSION = '.wikode'
 
+    CAN_EDIT = True
+    SHOW_WIKI = True
+
     PLACEHOLDER_LETTERS = string.ascii_lowercase + string.ascii_uppercase
     PLACEHOLDER_LENGTH = 32
 
@@ -234,3 +237,41 @@ class DefaultWikiPage(Wiki):
     @property
     def file_path(self):
         return os.path.join(self.dir_path, self.DEFAULT_WIKI_NAME + self.FILE_EXTENSION)
+
+
+class IndexPage(Wiki):
+
+    INDEX_PAGE_NAME = 'Index'
+    CAN_EDIT = False
+    SHOW_WIKI = False
+
+    def __init__(self):
+        super(IndexPage, self).__init__(self.INDEX_PAGE_NAME)
+        self.pages = []
+
+    def save(self):
+        raise NotImplementedError
+
+    @property
+    def children_files(self):
+        if self._children_files is None:
+            # List all files in dir
+            cs = glob.glob(self.dir_path + '/*') + glob.glob(self.dir_path + '/**/*')
+            for c in cs:
+                # Remove file if not a directory or doesn't a valid
+                # wiki extension
+                if not c.endswith(Wiki.FILE_EXTENSION) and not os.path.isdir(c):
+                    cs.remove(c)
+            # Convert paths to urls
+            self._children_files = [
+                Wiki.filename_to_url(c)
+                for c in cs
+            ]
+            # Remove any duplicates
+            res = []
+            [res.append(c) for c in self._children_files if c not in res]
+            # Sort list of children
+            self._children_files = sorted(res)
+
+        return self._children_files
+>>>>>>> Stashed changes
