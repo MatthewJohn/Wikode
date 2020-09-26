@@ -14,6 +14,10 @@ class Config(object):
     class KEYS(Enum):  # pylint: disable=R0903
         """Enum of config key lookup values"""
         SCM_TYPE = 'SCM_TYPE'
+        SCM_URL = 'SCM_URL'
+        SCM_USERNAME = 'SCM_USERNAME'
+        SCM_PASSWORD = 'SCM_PASSWORD'
+
         DATA_DIR = 'DATA_DIR'
         SQLITE_PATH = 'SQLITE_PATH'
         LISTEN_HOST = 'LISTEN_HOST'
@@ -22,6 +26,10 @@ class Config(object):
     # Default config values
     DEFAULTS = {
         KEYS.SCM_TYPE: None,
+        KEYS.SCM_URL: None,
+        KEYS.SCM_USERNAME: None,
+        KEYS.SCM_PASSWORD: None,
+
         KEYS.DATA_DIR: './data',
         KEYS.SQLITE_PATH: './db.sqlite',
         KEYS.LISTEN_HOST: '127.0.0.1',
@@ -69,3 +77,15 @@ class Config(object):
     def scm_url(self):
         """Property to obtain SCM URL config."""
         return self.get(Config.KEYS.SCM_URL)
+
+    @property
+    def scm_username(self):
+        """Property to obtain SCM Type config."""
+        return self.get(Config.KEYS.SCM_USERNAME)
+
+    @property
+    def scm_password(self):
+        """Property to obtain SCM URL config."""
+        return self.get(Config.KEYS.SCM_PASSWORD)
+
+

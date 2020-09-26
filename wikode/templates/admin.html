@@ -27,5 +27,11 @@
     </table>
 </form>
 
+{% if not scm_is_setup and scm_can_setup %}
+<form method="post">
+    <input type="hidden" name="action" value="scm_setup" />
+    <input type="submit" value="Setup SCM" />
+</form>
+{% endif %}
 
 {% endblock %}
