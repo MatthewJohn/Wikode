@@ -240,7 +240,8 @@ class Wiki(object):
         return (os.path.isfile(self.dir_path) or
                 '/.' in self.url_struct or
                 '..' in self.url_struct or
-                self.url_struct.startswith('.'))
+                self.url_struct.startswith('.') or
+                self.url_struct == 'search')
 
 
 class DefaultWikiPage(Wiki):
