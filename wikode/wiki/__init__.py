@@ -41,7 +41,7 @@ class Wiki(object):
         r'((?:^ *1\. [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
-    WIKI_RE__TABLE = re.compile(r'((?:^\|\|[^\n]+$\n)+)', re.DOTALL | re.MULTILINE)
+    WIKI_RE__TABLE = re.compile(r'((?:^[|][|][^\n]+$\n)+)', re.DOTALL | re.MULTILINE)
 
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
 
@@ -171,6 +171,15 @@ class Wiki(object):
                 self._source = ''
         return self._source
 
+    @staticmethod
+    def generate_placeholder():
+        return (
+            ''.join(
+                random.choice(Wiki.PLACEHOLDER_LETTERS)
+                for i in range(Wiki.PLACEHOLDER_LENGTH)
+            )
+        )
+
     @property
     def rendered(self):
         rendered = self.source
@@ -178,14 +187,7 @@ class Wiki(object):
         # PREFORMAT  - MUST BE BEFORE ANY OTHER REPLACEMENTS
         preformat_strings = {}
         def replace_preformat(m):
-            random_value = (
-                'WIKOD_PH_START_' +
-                ''.join(
-                    random.choice(Wiki.PLACEHOLDER_LETTERS)
-                    for i in range(Wiki.PLACEHOLDER_LENGTH)
-                ) +
-                '_WIKOD_PH_END'
-            )
+            random_value = self.generate_placeholder()
             preformat_strings[random_value] = m.group(1)
             return random_value
         rendered = self.WIKI_RE__PREFORMATTED.sub(replace_preformat, rendered)
@@ -224,17 +226,25 @@ class Wiki(object):
             return '<ol>' + ''.join(lines) + '</ol>'
         rendered = self.WIKI_RE__LIST.sub(replace_list, rendered)
 
+        # Replace pipes with placeholders
+        pipe_placeholder = self.generate_placeholder()
+        rendered = rendered.replace('||', pipe_placeholder)
+
         def replace_table(m):
-            print("table: " + m.match(1))
             lines = []
-            for line in m.group(1).split('\n'):
+            for line in m.group(1).replace(pipe_placeholder, '||').split('\n'):
                 cols = []
-                for col in line.split('||'):
+                for col in line.split('||')[1:-1]:
                     cols.append('<td>' + col + '</td>')
                 lines.append('<tr>' + ''.join(cols) + '</tr>')
 
             return '<table>' + ''.join(lines) + '</table>'
-        rendered = self.WIKI_RE__TABLE.sub(replace_table, rendered)
+        #rendered = self.WIKI_RE__TABLE.sub(replace_table, rendered)
+        print(pipe_placeholder)
+        wiki_match = re.compile(r'((?:^' + re.escape(pipe_placeholder) + r'.+$\n)+)', re.MULTILINE)
+        rendered = wiki_match.sub(replace_table, rendered)
+        #print(rendered)
+
 
         # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />\n', rendered)
