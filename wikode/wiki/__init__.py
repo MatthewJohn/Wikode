@@ -41,8 +41,6 @@ class Wiki(object):
         r'((?:^ *1\. [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
-    WIKI_RE__TABLE = re.compile(r'((?:^[|][|][^\n]+$\n)+)', re.DOTALL | re.MULTILINE)
-
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
 
     def __init__(self, url_struct):
@@ -229,7 +227,6 @@ class Wiki(object):
         # Replace pipes with placeholders
         pipe_placeholder = self.generate_placeholder()
         rendered = rendered.replace('||', pipe_placeholder)
-
         def replace_table(m):
             lines = []
             for line in m.group(1).replace(pipe_placeholder, '||').split('\n'):
@@ -239,12 +236,8 @@ class Wiki(object):
                 lines.append('<tr>' + ''.join(cols) + '</tr>')
 
             return '<table>' + ''.join(lines) + '</table>'
-        #rendered = self.WIKI_RE__TABLE.sub(replace_table, rendered)
-        print(pipe_placeholder)
         wiki_match = re.compile(r'((?:^' + re.escape(pipe_placeholder) + r'.+$\n)+)', re.MULTILINE)
         rendered = wiki_match.sub(replace_table, rendered)
-        #print(rendered)
-
 
         # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />\n', rendered)
