@@ -41,6 +41,8 @@ class Wiki(object):
         r'((?:^ *1\. [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
+    WIKI_RE__TABLE = re.compile(r'((?:^\|\|[^\n]+$\n)+)', re.DOTALL | re.MULTILINE)
+
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
 
     def __init__(self, url_struct):
@@ -222,9 +224,20 @@ class Wiki(object):
             return '<ol>' + ''.join(lines) + '</ol>'
         rendered = self.WIKI_RE__LIST.sub(replace_list, rendered)
 
+        def replace_table(m):
+            print("table: " + m.match(1))
+            lines = []
+            for line in m.group(1).split('\n'):
+                cols = []
+                for col in line.split('||'):
+                    cols.append('<td>' + col + '</td>')
+                lines.append('<tr>' + ''.join(cols) + '</tr>')
+
+            return '<table>' + ''.join(lines) + '</table>'
+        rendered = self.WIKI_RE__TABLE.sub(replace_table, rendered)
+
         # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />\n', rendered)
-
 
         # Re-add preformat placeholders - MUST BE AT END
         for preformat_placeholder in preformat_strings:
