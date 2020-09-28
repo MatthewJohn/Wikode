@@ -169,6 +169,15 @@ class Wiki(object):
                 self._source = ''
         return self._source
 
+    @staticmethod
+    def generate_placeholder():
+        return (
+            ''.join(
+                random.choice(Wiki.PLACEHOLDER_LETTERS)
+                for i in range(Wiki.PLACEHOLDER_LENGTH)
+            )
+        )
+
     @property
     def rendered(self):
         rendered = self.source
@@ -176,14 +185,7 @@ class Wiki(object):
         # PREFORMAT  - MUST BE BEFORE ANY OTHER REPLACEMENTS
         preformat_strings = {}
         def replace_preformat(m):
-            random_value = (
-                'WIKOD_PH_START_' +
-                ''.join(
-                    random.choice(Wiki.PLACEHOLDER_LETTERS)
-                    for i in range(Wiki.PLACEHOLDER_LENGTH)
-                ) +
-                '_WIKOD_PH_END'
-            )
+            random_value = self.generate_placeholder()
             preformat_strings[random_value] = m.group(1)
             return random_value
         rendered = self.WIKI_RE__PREFORMATTED.sub(replace_preformat, rendered)
@@ -244,9 +246,23 @@ class Wiki(object):
             return '<ol>' + ''.join(lines) + '</ol>'
         rendered = self.WIKI_RE__LIST.sub(replace_list, rendered)
 
+        # Replace pipes with placeholders
+        pipe_placeholder = self.generate_placeholder()
+        rendered = rendered.replace('||', pipe_placeholder)
+        def replace_table(m):
+            lines = []
+            for line in m.group(1).replace(pipe_placeholder, '||').split('\n'):
+                cols = []
+                for col in line.split('||')[1:-1]:
+                    cols.append('<td>' + col + '</td>')
+                lines.append('<tr>' + ''.join(cols) + '</tr>')
+
+            return '<table>' + ''.join(lines) + '</table>'
+        wiki_match = re.compile(r'((?:^' + re.escape(pipe_placeholder) + r'.+$\n)+)', re.MULTILINE)
+        rendered = wiki_match.sub(replace_table, rendered)
+
         # NEW LINE REPLACEMENT - MUST BE AFTER ALL MULTILINE REPLACENTS
         rendered = self.WIKI_RE__NEW_LINE.sub('<br />\n', rendered)
-
 
         # Re-add preformat placeholders - MUST BE AT END
         for preformat_placeholder in preformat_strings:
@@ -262,7 +278,8 @@ class Wiki(object):
         return (os.path.isfile(self.dir_path) or
                 '/.' in self.url_struct or
                 '..' in self.url_struct or
-                self.url_struct.startswith('.'))
+                self.url_struct.startswith('.') or
+                self.url_struct == 'search')
 
 
 class DefaultWikiPage(Wiki):
