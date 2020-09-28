@@ -202,14 +202,36 @@ class Wiki(object):
             return '<h{0}>{1}</h{0}>'.format(header_size, m.group(2))
         rendered = self.WIKI_RE__HEADER.sub(replace_header, rendered)
 
+        def count_bullets(line, current_level):
+            points = re.match(r'^([\s\*]+)', line)
+
+            new_level = 0
+            if points:
+                new_level = points.group(0).count('*')
+
+            if new_level > current_level:
+                return ['<ul>' * (new_level - current_level)], new_level
+            elif new_level < current_level:
+                return ['</ul>' * (current_level - new_level)], new_level
+
+            return [], current_level
+
         def replace_bullet(m):
             lines = []
+            current_level = 0
+            # Iterate through lines
             for line in m.group(1).split('\n'):
+                new_lines, current_level = count_bullets(line, current_level)
+                lines += new_lines
                 line = re.sub(r'^\s*\*+', '<li>', line)
                 line = re.sub(r'$', '</li>', line)
                 lines.append(line)
 
-            return '<ul>' + ''.join(lines) + '</ul>'
+            new_lines, current_level = count_bullets('', current_level)
+            lines += new_lines
+
+            return ''.join(lines)
+
         rendered = self.WIKI_RE__BULLET.sub(replace_bullet, rendered)
 
         def replace_list(m):
