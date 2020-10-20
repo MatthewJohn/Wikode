@@ -97,6 +97,11 @@ class Wiki(object):
         )
         if path.endswith(Wiki.FILE_EXTENSION):
             path = path[:-len(Wiki.FILE_EXTENSION)]
+
+        # Check if index
+        if path == '/index':
+            path = '/'
+
         return path
 
     @property
@@ -114,6 +119,9 @@ class Wiki(object):
                 Wiki.filename_to_url(c)
                 for c in cs
             ]
+            # Remove self, if listed
+            if self.absolute_url in self._children_files:
+                self._children_files.remove(self.absolute_url)
             # Remove any duplicates
             res = []
             [res.append(c) for c in self._children_files if c not in res]
