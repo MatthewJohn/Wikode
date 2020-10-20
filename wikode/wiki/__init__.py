@@ -97,6 +97,11 @@ class Wiki(object):
         )
         if path.endswith(Wiki.FILE_EXTENSION):
             path = path[:-len(Wiki.FILE_EXTENSION)]
+
+        # Check if index
+        if path == '/index':
+            path = '/'
+
         return path
 
     @property
