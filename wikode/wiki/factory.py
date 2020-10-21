@@ -26,7 +26,6 @@ class Factory(object):
         url_struct = Wiki.filename_to_url_struct(Wiki.strip_relative_path(path))
         return Factory.get_wiki_object_from_url(url_struct)
 
-
     @staticmethod
     def serve_wiki_page(url_struct=None):
 
