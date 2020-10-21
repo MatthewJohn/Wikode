@@ -6,7 +6,8 @@ from wikode.config import Config
 from wikode.scm import Factory as SCMFactory
 from wikode.wiki.factory import Factory as WikiFactory
 from wikode.admin import Admin as AdminPage
-from wikode.indexer import SearchPage, Indexer
+from wikode.indexer import Indexer
+from wikode.wiki.search import SearchPage
 
 
 class Server(object):

@@ -6,9 +6,9 @@
 <h3>Results for: {{ search_query }}</h3>
 
 <table>
-    {% for row in results %}
+    {% for wiki in results %}
     <tr>
-        <td><a href="{{ row }}">{{ row }}</a></td>
+        <td><a href="{{ wiki.absolute_url }}">{{ wiki.url_struct }}</a></td>
     </tr>
     {% endfor %}
 </table>
