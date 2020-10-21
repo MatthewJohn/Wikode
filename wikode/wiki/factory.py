@@ -11,19 +11,28 @@ from wikode.scm import Factory as SCMFactory
 
 class Factory(object):
 
-    @staticmethod
-    def get_wiki_object_from_path(url_struct):
+    @classmethod
+    def get_wiki_object_from_url(cls, url_struct):
         if url_struct is None:
+            return DefaultWikiPage(cls)
+        elif url_struct.lower() == 'index':
+            return IndexPage(cls)
+        return Wiki(cls, url_struct)
+
+    @classmethod
+    def get_wiki_object_from_file(cls, path):
+        url_struct = Wiki.strip_relative_path(path)
+        if path is None or url_struct == '':
             return DefaultWikiPage()
         elif url_struct.lower() == 'index':
             return IndexPage()
-        return Wiki(url_struct)
+        return Wiki(cls, url_struct)
 
 
     @staticmethod
     def serve_wiki_page(url_struct=None):
 
-        wiki = Factory.get_wiki_object_from_path(url_struct)
+        wiki = Factory.get_wiki_object_from_url(url_struct)
 
         if wiki.is_reserved:
             return render_template('wiki_reserved.html', wiki=wiki)
@@ -36,7 +45,7 @@ class Factory(object):
     @staticmethod
     def page_post(url_struct=None):
 
-        wiki = Factory.get_wiki_object_from_path(url_struct)
+        wiki = Factory.get_wiki_object_from_url(url_struct)
 
         wiki_content = request.form.get('source', None)
         if wiki_content is not None:
@@ -51,5 +60,5 @@ class Factory(object):
                     Config.get(Config.KEYS.DATA_DIR),
                     '**/*' + Wiki.FILE_EXTENSION),
                 recursive=True):
-            wiki = Wiki(Wiki.filename_to_url(f))
+            wiki = self.get_wiki_object_from_file(f)
             wiki.index()

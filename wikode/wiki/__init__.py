@@ -21,7 +21,7 @@ class Wiki(object):
     PLACEHOLDER_LETTERS = string.ascii_lowercase + string.ascii_uppercase
     PLACEHOLDER_LENGTH = 32
 
-    RE_RELATIVE_PATH_PREFIX = re.compile(r'^\./', re.IGNORECASE)
+    RE_RELATIVE_PATH_PREFIX = re.compile(r'^\.?/', re.IGNORECASE)
     RE_DATA_PREFIX = re.compile(
         r'{0}'.format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
@@ -43,7 +43,8 @@ class Wiki(object):
 
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
 
-    def __init__(self, url_struct):
+    def __init__(self, factory, url_struct):
+        self._factory = factory
         self.url_struct = url_struct
         self.pages = url_struct.split('/')
         self._source = None
@@ -86,21 +87,26 @@ class Wiki(object):
             html += ' / <a href="{0}">{1}</a>'.format(url_path, page)
         return '<div id="breadcrumb">' + html + '</div>'
 
+
     @staticmethod
-    def filename_to_url(path):
-        path = Wiki.RE_RELATIVE_PATH_PREFIX.sub(
+    def strip_relative_path(path):
+        """Strip ./ from path"""
+        return Wiki.RE_RELATIVE_PATH_PREFIX.sub(
             '',
             Wiki.RE_DATA_PREFIX.sub(
                 '',
                 path
             )
         )
+
+    @staticmethod
+    def filename_to_url_struct(path):
         if path.endswith(Wiki.FILE_EXTENSION):
             path = path[:-len(Wiki.FILE_EXTENSION)]
 
         # Check if index
-        if path == '/index':
-            path = '/'
+        if path == 'index':
+            path = ''
 
         return path
 
@@ -109,24 +115,27 @@ class Wiki(object):
         if self._children_files is None:
             # List all files in dir
             cs = glob.glob(self.dir_path + '/*')
+            url_list = []
             for c in cs:
+                c = Wiki.strip_relative_path(c)
                 # Remove file if not a directory or doesn't a valid
-                # wiki extension
-                if not c.endswith(Wiki.FILE_EXTENSION) and not os.path.isdir(c):
-                    cs.remove(c)
-            # Convert paths to urls
-            self._children_files = [
-                Wiki.filename_to_url(c)
-                for c in cs
-            ]
-            # Remove self, if listed
-            if self.absolute_url in self._children_files:
-                self._children_files.remove(self.absolute_url)
-            # Remove any duplicates
-            res = []
-            [res.append(c) for c in self._children_files if c not in res]
+                # wiki extension.
+                if not c.endswith(Wiki.FILE_EXTENSION) and os.path.isdir(c):
+                    continue
+
+                # Convert file path to URL
+                url = Wiki.filename_to_url_struct(c)
+
+                # Skip, if self
+                if url == self.url_struct:
+                    continue
+
+                # If not already in the list, add it
+                if url not in url_list:
+                    url_list.append(url)
+
             # Sort list of children
-            self._children_files = sorted(res)
+            self._children_files = [Wiki(self._factory, url) for url in sorted(url_list)]
 
         return self._children_files
 
@@ -136,7 +145,7 @@ class Wiki(object):
 
     @property
     def children_html(self):
-        return '<ul>' + ''.join(['<li><a href="{0}">{0}</a></li>'.format(fn) for fn in self.children_files]) + '</ul>'
+        return '<ul>' + ''.join(['<li><a href="{0}">{0}</a></li>'.format(fn.absolute_url) for fn in self.children_files]) + '</ul>'
 
     def save(self, content):
         parent_path = Config.get(Config.KEYS.DATA_DIR)
@@ -294,9 +303,10 @@ class DefaultWikiPage(Wiki):
 
     DEFAULT_WIKI_NAME = 'index'
 
-    def __init__(self):
-        super(DefaultWikiPage, self).__init__(self.DEFAULT_WIKI_NAME)
+    def __init__(self, factory):
+        super(DefaultWikiPage, self).__init__(factory, self.DEFAULT_WIKI_NAME)
         self.pages = []
+        self.url_struct = ''
 
     @property
     def file_path(self):
@@ -309,32 +319,9 @@ class IndexPage(Wiki):
     CAN_EDIT = False
     SHOW_WIKI = False
 
-    def __init__(self):
-        super(IndexPage, self).__init__(self.INDEX_PAGE_NAME)
+    def __init__(self, factory):
+        super(IndexPage, self).__init__(factory, self.INDEX_PAGE_NAME)
         self.pages = []
 
     def save(self):
         raise NotImplementedError
-
-    @property
-    def children_files(self):
-        if self._children_files is None:
-            # List all files in dir
-            cs = glob.glob(self.dir_path + '/*') + glob.glob(self.dir_path + '/**/*')
-            for c in cs:
-                # Remove file if not a directory or doesn't a valid
-                # wiki extension
-                if not c.endswith(Wiki.FILE_EXTENSION) and not os.path.isdir(c):
-                    cs.remove(c)
-            # Convert paths to urls
-            self._children_files = [
-                Wiki.filename_to_url(c)
-                for c in cs
-            ]
-            # Remove any duplicates
-            res = []
-            [res.append(c) for c in self._children_files if c not in res]
-            # Sort list of children
-            self._children_files = sorted(res)
-
-        return self._children_files
