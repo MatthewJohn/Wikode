@@ -21,12 +21,10 @@ class Factory(object):
 
     @classmethod
     def get_wiki_object_from_file(cls, path):
-        url_struct = Wiki.strip_relative_path(path)
-        if path is None or url_struct == '':
-            return DefaultWikiPage()
-        elif url_struct.lower() == 'index':
-            return IndexPage()
-        return Wiki(cls, url_struct)
+        if path is None:
+            path = ''
+        url_struct = Wiki.filename_to_url_struct(Wiki.strip_relative_path(path))
+        return Factory.get_wiki_object_from_url(url_struct)
 
 
     @staticmethod
@@ -60,5 +58,5 @@ class Factory(object):
                     Config.get(Config.KEYS.DATA_DIR),
                     '**/*' + Wiki.FILE_EXTENSION),
                 recursive=True):
-            wiki = self.get_wiki_object_from_file(f)
+            wiki = Factory.get_wiki_object_from_file(f)
             wiki.index()
