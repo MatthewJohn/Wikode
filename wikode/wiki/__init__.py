@@ -50,7 +50,7 @@ class Wiki(object):
         self._source = None
         self._exists = None
         self._dir_path = None
-        self._children_files = None
+        self._children_wiki = None
         self._created = False
 
     @property
@@ -112,9 +112,13 @@ class Wiki(object):
 
     @property
     def children_files(self):
-        if self._children_files is None:
+        return glob.glob(self.dir_path + '/*')
+
+    @property
+    def child_wikis(self):
+        if self._children_wiki is None:
             # List all files in dir
-            cs = glob.glob(self.dir_path + '/*')
+            cs = self.children_files
             url_list = []
             for c in cs:
                 c = Wiki.strip_relative_path(c)
@@ -135,17 +139,17 @@ class Wiki(object):
                     url_list.append(url)
 
             # Sort list of children
-            self._children_files = [Wiki(self._factory, url) for url in sorted(url_list)]
+            self._child_wikis = [Wiki(self._factory, url) for url in sorted(url_list)]
 
-        return self._children_files
+        return self._child_wikis
 
     @property
     def has_children(self):
-        return len(self.children_files)
+        return len(self.child_wikis)
 
     @property
     def children_html(self):
-        return '<ul>' + ''.join(['<li><a href="{0}">{0}</a></li>'.format(fn.absolute_url) for fn in self.children_files]) + '</ul>'
+        return '<ul>' + ''.join(['<li><a href="{0}">{0}</a></li>'.format(fn.absolute_url) for fn in self.child_wikis]) + '</ul>'
 
     def save(self, content):
         parent_path = Config.get(Config.KEYS.DATA_DIR)
@@ -325,3 +329,12 @@ class IndexPage(Wiki):
 
     def save(self):
         raise NotImplementedError
+
+    @property
+    def children_files(self):
+        """Return list of children files."""
+        return glob.glob(self.dir_path + '/*') + glob.glob(self.dir_path + '/**/*')
+
+    @property
+    def child_wikis(self):
+        return list(filter(lambda x: x.exists, super(IndexPage, self).child_wikis))
