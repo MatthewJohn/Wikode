@@ -86,5 +86,5 @@ class Indexer(object):
             c.execute("""DELETE FROM wiki WHERE file= ?""", (wiki.file_path,))
             c.execute(
                 """INSERT INTO wiki(file, url, content) VALUES(?, ?, ?)""",
-                (wiki.file_path, wiki.url_struct, Indexer.escape_invalid_characters(wiki.rendered)))
+                (wiki.file_path, wiki.url_struct, Indexer.escape_invalid_characters(wiki.name + '\n' + wiki.rendered)))
             db.commit()
