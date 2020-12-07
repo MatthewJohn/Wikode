@@ -52,6 +52,12 @@ class Indexer(object):
         return False
 
     def search(self, search_string):
+        """Perform search for wiki pages based on given search string."""
+        # Replace dashes, as sqlite requires alphanumeric characters
+        # for parameters (although underscores and other characters appear to work)
+        # as per https://stackoverflow.com/a/28195529
+        search_string = search_string.replace('-', ' ')
+
         with DatabaseFactory.sql_connect() as db:
             c = db.cursor()
             r = c.execute(
@@ -68,5 +74,5 @@ class Indexer(object):
             c.execute("""DELETE FROM wiki WHERE file= ?""", (wiki.file_path,))
             c.execute(
                 """INSERT INTO wiki(file, url, content) VALUES(?, ?, ?)""",
-                (wiki.file_path, wiki.url_struct, wiki.rendered))
+                (wiki.file_path, wiki.url_struct, wiki.rendered.replace('-', ' ')))
             db.commit()
