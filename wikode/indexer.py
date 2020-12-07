@@ -63,7 +63,6 @@ class Indexer(object):
             r = c.execute(
                 """SELECT url FROM wiki WHERE wiki MATCH ?""",
                 (search_string,)).fetchall()
-            print(r)
             return [i[0] for i in r]
 
     @staticmethod
