@@ -51,12 +51,25 @@ class Indexer(object):
                 return True
         return False
 
+    @classmethod
+    def escape_invalid_characters(cls, string):
+        """Remove invalid characters from value which will be ued
+        in SQLite MATCH statement"""
+        invalid_characters = [
+            # Replace dashes, as sqlite requires alphanumeric characters
+            # for parameters (although underscores and other characters appear to work)
+            # as per https://stackoverflow.com/a/28195529
+            '-'
+        ]
+        # Iterate through and replace all characters with spaces
+        for char in invalid_characters:
+            string = string.replace(char, ' ')
+
+        return string
+
     def search(self, search_string):
         """Perform search for wiki pages based on given search string."""
-        # Replace dashes, as sqlite requires alphanumeric characters
-        # for parameters (although underscores and other characters appear to work)
-        # as per https://stackoverflow.com/a/28195529
-        search_string = search_string.replace('-', ' ')
+        search_string = Indexer.escape_invalid_characters(search_string)
 
         with DatabaseFactory.sql_connect() as db:
             c = db.cursor()
@@ -73,5 +86,5 @@ class Indexer(object):
             c.execute("""DELETE FROM wiki WHERE file= ?""", (wiki.file_path,))
             c.execute(
                 """INSERT INTO wiki(file, url, content) VALUES(?, ?, ?)""",
-                (wiki.file_path, wiki.url_struct, wiki.rendered.replace('-', ' ')))
+                (wiki.file_path, wiki.url_struct, Indexer.escape_invalid_characters(wiki.rendered)))
             db.commit()
