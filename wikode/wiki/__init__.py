@@ -54,6 +54,10 @@ class Wiki(object):
         self._created = False
 
     @property
+    def name(self):
+        return self.url_struct[-1]
+
+    @property
     def dir_path(self):
         if self._dir_path is None:
             self._dir_path = os.path.join(Config.get(Config.KEYS.DATA_DIR), *self.pages)
@@ -86,7 +90,6 @@ class Wiki(object):
             url_path += '/{0}'.format(page)
             html += ' / <a href="{0}">{1}</a>'.format(url_path, page)
         return '<div id="breadcrumb">' + html + '</div>'
-
 
     @staticmethod
     def strip_relative_path(path):
