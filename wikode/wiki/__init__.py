@@ -202,6 +202,14 @@ class Wiki(object):
             )
         )
 
+    @staticmethod
+    def escaspe_html_characters(input):
+        """Replace HTML interpreted chracters with entities."""
+        # Replace all entities, starting with &, as this will be used in all replacements.
+        for replacements in [('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'), ('\'', '&#39;'), ('"', '&#34;')]:
+            input = input.replace(replacements[0], replacements[1])
+        return input
+
     @property
     def rendered(self):
         rendered = self.source
@@ -210,7 +218,8 @@ class Wiki(object):
         preformat_strings = {}
         def replace_preformat(m):
             random_value = self.generate_placeholder()
-            preformat_strings[random_value] = m.group(1)
+            preformatted_value = m.group(1)
+            preformat_strings[random_value] = self.escaspe_html_characters(m.group(1))
             return random_value
         rendered = self.WIKI_RE__PREFORMATTED.sub(replace_preformat, rendered)
 
