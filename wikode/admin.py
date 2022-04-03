@@ -1,17 +1,18 @@
 
 from flask import render_template, redirect, request
 
+from wikode.base_page import BasePage
 from wikode.scm import Factory as SCMFactory
 from wikode.wiki.factory import Factory as WikiFactory
 
 
-class Admin(object):
+class Admin(BasePage):
 
     URL = '/admin'
 
     @staticmethod
     def admin_get():
-        return render_template(
+        return Admin.render_template(
             'admin.html',
             scm_is_setup=SCMFactory.get_scm().is_setup(),
             scm_can_setup=SCMFactory.get_scm().can_setup())
