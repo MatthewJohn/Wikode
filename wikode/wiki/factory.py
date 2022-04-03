@@ -2,14 +2,15 @@
 import os
 import glob
 
-from flask import render_template, request, redirect
+from flask import request, redirect
 
+from wikode.base_page import BasePage
 from wikode.config import Config
 from wikode.wiki import Wiki, DefaultWikiPage, IndexPage
 from wikode.scm import Factory as SCMFactory
 
 
-class Factory(object):
+class Factory(BasePage):
 
     @classmethod
     def get_wiki_object_from_url(cls, url_struct):
@@ -32,12 +33,12 @@ class Factory(object):
         wiki = Factory.get_wiki_object_from_url(url_struct)
 
         if wiki.is_reserved:
-            return render_template('wiki_reserved.html', wiki=wiki)
+            return Factory.render_template('wiki_reserved.html', wiki=wiki)
 
         if request.args.get('edit', False):
-            return render_template('wiki_edit.html', wiki=wiki)
+            return Factory.render_template('wiki_edit.html', wiki=wiki)
 
-        return render_template('wiki.html', wiki=wiki)
+        return Factory.render_template('wiki.html', wiki=wiki)
 
     @staticmethod
     def page_post(url_struct=None):
