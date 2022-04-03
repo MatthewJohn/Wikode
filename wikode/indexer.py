@@ -108,3 +108,10 @@ class Indexer(object):
                     (wiki.file_path, wiki.url_struct, tag)
                 )
             db.commit()
+
+    def get_all_tags(self):
+        """Return all tags"""
+        with DatabaseFactory.sql_connect() as db:
+            c = db.cursor()
+            r = c.execute("""SELECT tag FROM tags""")
+            return [i[0] for i in r]

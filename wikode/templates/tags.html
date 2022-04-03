@@ -1,0 +1,22 @@
+{% extends 'main.html' %}
+
+
+{% block content %}
+
+<h3>Tags</h3>
+
+<table>
+    {% for tag in tags %}
+    <tr>
+        <td>{{ tag }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not tags %}
+<h2>No tags found</h2>
+
+{% endif %}
+
+
+{% endblock %}
