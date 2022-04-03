@@ -33,8 +33,10 @@ class DatabaseFactory(object):
 class Indexer(object):
 
     TABLE_NAME = 'wiki'
+    TAG_TABLE = 'tags'
 
     def initialise_database(self):
+        modified_schema = False
         with DatabaseFactory.sql_connect() as db:
             c = db.cursor()
             r = c.execute(
@@ -48,8 +50,20 @@ class Indexer(object):
                     CREATE VIRTUAL TABLE wiki
                     USING FTS5(url, file, content);
                 """)
-                return True
-        return False
+                modified_schema = True
+            r = c.execute(
+                """
+                SELECT name FROM sqlite_master WHERE type='table' AND name=?;
+                """,
+                (Indexer.TAG_TABLE,)
+            )
+            if not len(r.fetchall()):
+                c.execute("""
+                    CREATE VIRTUAL TABLE tags
+                    USING FTS5(url, file, tag);
+                """)
+                modified_schema = True
+        return modified_schema
 
     @classmethod
     def escape_invalid_characters(cls, string):
@@ -87,4 +101,27 @@ class Indexer(object):
             c.execute(
                 """INSERT INTO wiki(file, url, content) VALUES(?, ?, ?)""",
                 (wiki.file_path, wiki.url_struct, Indexer.escape_invalid_characters(wiki.name + '\n' + wiki.rendered)))
+            c.execute("""DELETE FROM tags WHERE file=?""", (wiki.file_path, ))
+            for tag in wiki.tags:
+                c.execute(
+                    """INSERT INTO tags(file, url, tag) VALUES(?, ?, ?)""",
+                    (wiki.file_path, wiki.url_struct, tag)
+                )
             db.commit()
+
+    def get_all_tags(self):
+        """Return all tags"""
+        with DatabaseFactory.sql_connect() as db:
+            c = db.cursor()
+            r = c.execute("""SELECT tag FROM tags""")
+            return [i[0] for i in r]
+
+    def wikis_by_tag(self, tag_name):
+        """Get wikis based on tags."""
+        with DatabaseFactory.sql_connect() as db:
+            c = db.cursor()
+            r = c.execute(
+                """SELECT url FROM tags WHERE tag=?""",
+                (tag_name,)).fetchall()
+            return [i[0] for i in r]
+

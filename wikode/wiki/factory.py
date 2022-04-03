@@ -13,7 +13,7 @@ class Factory(object):
 
     @classmethod
     def get_wiki_object_from_url(cls, url_struct):
-        if url_struct is None:
+        if not url_struct:
             return DefaultWikiPage(cls)
         elif url_struct.lower() == 'index':
             return IndexPage(cls)
