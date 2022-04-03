@@ -5,6 +5,13 @@
 
 {{ wiki.breadcrumb_html | safe }}
 
+{% if wiki.CAN_EDIT %}
+<form method="get" action="{{ wiki.edit_url }}">
+    <input type="hidden" name="edit" value="1" />
+    <input class="inputButton" type="submit" value="{{ wiki.edit_button_text }}" />
+</form>
+{% endif %}
+
 {% if wiki.SHOW_WIKI %}
 
 {% if not wiki.exists %}
