@@ -26,8 +26,8 @@ class Wiki(object):
         r'{0}'.format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
     WIKI_RE__NEW_LINE = re.compile(r'\n')
-    WIKI_RE__LINK_WIKI = re.compile(r'\[\[([a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
-    WIKI_RE__LINK_EXTERNAL = re.compile(r'\[\[(https?\://[a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
+    WIKI_RE__LINK_WIKI = re.compile(r'\[([a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]')
+    WIKI_RE__LINK_EXTERNAL = re.compile(r'\[(https?\://[a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]')
     WIKI_RE__BOLD = re.compile(r'\*\*(.*?)\*\*')
     WIKI_RE__ITALICS = re.compile(r'__(.*?)__')
     WIKI_RE__DELETED = re.compile(r'~(.*?)~')
