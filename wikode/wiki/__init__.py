@@ -46,7 +46,7 @@ class Wiki(object):
     def __init__(self, factory, url_struct):
         self._factory = factory
         # Remove trailing slashes from LHS of URL
-        self.url_struct = url_struct.strip('/')
+        self.url_struct = re.sub('/+', '/', url_struct.strip('/'))
 
         self.pages = self.url_struct.split('/')
         self._source = None
