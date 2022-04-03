@@ -3,13 +3,14 @@ import sqlite3
 import glob
 import os
 
-from flask import request, render_template
+from flask import request
 
+from wikode.base_page import BasePage
 from wikode.indexer import Indexer
 from wikode.wiki.factory import Factory as WikiFactory
 
 
-class SearchPage(object):
+class SearchPage(BasePage):
     
     URL = '/search'
 
@@ -25,5 +26,5 @@ class SearchPage(object):
             res = [WikiFactory.get_wiki_object_from_url(row)
                    for row in Indexer().search(search_string)]
 
-        return render_template(
+        return SearchPage.render_template(
             'search.html', results=res, search_query=search_string)

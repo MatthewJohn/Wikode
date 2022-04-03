@@ -5,8 +5,6 @@ import re
 import random
 import string
 
-from flask import render_template, request, redirect
-
 from wikode.config import Config
 from wikode.indexer import Indexer
 
@@ -26,8 +24,8 @@ class Wiki(object):
         r'{0}'.format(re.escape(Config.get(Config.KEYS.DATA_DIR))))
 
     WIKI_RE__NEW_LINE = re.compile(r'\n')
-    WIKI_RE__LINK_WIKI = re.compile(r'\[\[([a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
-    WIKI_RE__LINK_EXTERNAL = re.compile(r'\[\[(https?\://[a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]\]')
+    WIKI_RE__LINK_WIKI = re.compile(r'\[([a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]')
+    WIKI_RE__LINK_EXTERNAL = re.compile(r'\[(https?\://[a-zA-Z0-9_\-/\.]+)(?: ([^\]]+))?\]')
     WIKI_RE__BOLD = re.compile(r'\*\*(.*?)\*\*')
     WIKI_RE__ITALICS = re.compile(r'__(.*?)__')
     WIKI_RE__DELETED = re.compile(r'~(.*?)~')
@@ -41,17 +39,22 @@ class Wiki(object):
         r'((?:^ *1\. [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
+    WIKI_RE__MACRO = re.compile(r'\[\[([A-Za-z]+)\(([^\)]*)\)\]\]')
+
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
 
     def __init__(self, factory, url_struct):
         self._factory = factory
-        self.url_struct = url_struct
-        self.pages = url_struct.split('/')
+        # Remove trailing slashes from LHS of URL
+        self.url_struct = re.sub('/+', '/', url_struct.strip('/'))
+
+        self.pages = self.url_struct.split('/')
         self._source = None
         self._exists = None
         self._dir_path = None
         self._children_wiki = None
         self._created = False
+        self._tags = []
 
     @property
     def name(self):
@@ -154,6 +157,12 @@ class Wiki(object):
     def children_html(self):
         return '<ul>' + ''.join(['<li><a href="{0}">{0}</a></li>'.format(fn.absolute_url) for fn in self.child_wikis]) + '</ul>'
 
+    @property
+    def tags(self):
+        """Return list of tags for wiki"""
+        # Return deduplicated list
+        return list(dict.fromkeys(self._tags))
+
     def save(self, content):
         parent_path = Config.get(Config.KEYS.DATA_DIR)
 
@@ -181,6 +190,8 @@ class Wiki(object):
 
     def index(self):
         """Add/re-add file to search index."""
+        # Render template before indexing
+        self.rendered
         Indexer.index_file(self)
 
     @property
@@ -202,17 +213,42 @@ class Wiki(object):
             )
         )
 
+    @staticmethod
+    def escaspe_html_characters(input):
+        """Replace HTML interpreted chracters with entities."""
+        # Replace all entities, starting with &, as this will be used in all replacements.
+        for replacements in [('&', '&amp;'), ('<', '&lt;'), ('>', '&gt;'), ('\'', '&#39;'), ('"', '&#34;')]:
+            input = input.replace(replacements[0], replacements[1])
+        return input
+
     @property
     def rendered(self):
         rendered = self.source
+
+        # Clear tags
+        self._tags = []
 
         # PREFORMAT  - MUST BE BEFORE ANY OTHER REPLACEMENTS
         preformat_strings = {}
         def replace_preformat(m):
             random_value = self.generate_placeholder()
-            preformat_strings[random_value] = m.group(1)
+            preformatted_value = m.group(1)
+            preformat_strings[random_value] = self.escaspe_html_characters(m.group(1))
             return random_value
         rendered = self.WIKI_RE__PREFORMATTED.sub(replace_preformat, rendered)
+
+        # MACROS - MUST BE BEFORE LINK
+        def process_macro(m):
+
+            macro_name = m.group(1)
+            if macro_name == 'Tags':
+                self._tags += [t.strip() for t in m.group(2).split(',')]
+                # Remove entire macro
+                return ''
+            else:
+                return '[Unknown macro: {0}]'.format(macro_name)
+
+        rendered = self.WIKI_RE__MACRO.sub(process_macro, rendered)
 
         def replace_link(m):
             return '<a href="{0}">{1}</a>'.format(m.group(1), m.group(2) if m.group(2) else m.group(1))
@@ -314,6 +350,10 @@ class DefaultWikiPage(Wiki):
         super(DefaultWikiPage, self).__init__(factory, self.DEFAULT_WIKI_NAME)
         self.pages = []
         self.url_struct = ''
+
+    @property
+    def name(self):
+        return 'index'
 
     @property
     def file_path(self):
