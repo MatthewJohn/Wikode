@@ -5,8 +5,6 @@ import re
 import random
 import string
 
-from flask import render_template, request, redirect
-
 from wikode.config import Config
 from wikode.indexer import Indexer
 

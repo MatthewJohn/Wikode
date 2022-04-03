@@ -1,9 +1,5 @@
 
 import sqlite3
-import glob
-import os
-
-from flask import request, render_template
 
 from wikode.config import Config
 

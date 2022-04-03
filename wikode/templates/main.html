@@ -104,6 +104,17 @@ a {
     height: 40px;
 }
 
+.warning {
+    background-color: yellow;
+    margin: 10px;
+    padding: 10px;
+}
+.error {
+    background-color: red;
+    margin: 10px;
+    padding: 10px;
+}
+
 </style>
 
 </head>
@@ -130,6 +141,19 @@ a {
 </div>
 
 <div id="content">
+
+    {% for warning in warnings %}
+    <div class="warning">
+        {{ warning }}
+    </div>
+    {% endfor %}
+
+    {% for error in errors %}
+    <div class="error">
+        {{ error }}
+    </div>
+    {% endfor %}
+
 {% block content %}{% endblock %}
 </div>
 </body>
