@@ -36,6 +36,7 @@ class Indexer(object):
     TAG_TABLE = 'tags'
 
     def initialise_database(self):
+        modified_schema = False
         with DatabaseFactory.sql_connect() as db:
             c = db.cursor()
             r = c.execute(
@@ -49,7 +50,7 @@ class Indexer(object):
                     CREATE VIRTUAL TABLE wiki
                     USING FTS5(url, file, content);
                 """)
-                return True
+                modified_schema = True
             r = c.execute(
                 """
                 SELECT name FROM sqlite_master WHERE type='table' AND name=?;
@@ -61,8 +62,8 @@ class Indexer(object):
                     CREATE VIRTUAL TABLE tags
                     USING FTS5(url, file, tag);
                 """)
-                return True
-        return False
+                modified_schema = True
+        return modified_schema
 
     @classmethod
     def escape_invalid_characters(cls, string):
