@@ -34,5 +34,9 @@
 
 {% endif %}
 
+{% if wiki.tags %}
+Tags: {{ ', '.join(wiki.tags) }}
+{% endif %}
+
 
 {% endblock %}

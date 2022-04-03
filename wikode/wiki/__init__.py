@@ -41,6 +41,8 @@ class Wiki(object):
         r'((?:^ *1\. [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
+    WIKI_RE__MACRO = re.compile(r'\[\[([A-Za-z]+)\(([^\)]*)\)\]\]')
+
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
 
     def __init__(self, factory, url_struct):
@@ -54,6 +56,7 @@ class Wiki(object):
         self._dir_path = None
         self._children_wiki = None
         self._created = False
+        self._tags = []
 
     @property
     def name(self):
@@ -156,6 +159,12 @@ class Wiki(object):
     def children_html(self):
         return '<ul>' + ''.join(['<li><a href="{0}">{0}</a></li>'.format(fn.absolute_url) for fn in self.child_wikis]) + '</ul>'
 
+    @property
+    def tags(self):
+        """Return list of tags for wiki"""
+        # Return deduplicated list
+        return list(dict.fromkeys(self._tags))
+
     def save(self, content):
         parent_path = Config.get(Config.KEYS.DATA_DIR)
 
@@ -216,6 +225,9 @@ class Wiki(object):
     def rendered(self):
         rendered = self.source
 
+        # Clear tags
+        self._tags = []
+
         # PREFORMAT  - MUST BE BEFORE ANY OTHER REPLACEMENTS
         preformat_strings = {}
         def replace_preformat(m):
@@ -224,6 +236,19 @@ class Wiki(object):
             preformat_strings[random_value] = self.escaspe_html_characters(m.group(1))
             return random_value
         rendered = self.WIKI_RE__PREFORMATTED.sub(replace_preformat, rendered)
+
+        # MACROS - MUST BE BEFORE LINK
+        def process_macro(m):
+
+            macro_name = m.group(1)
+            if macro_name == 'Tags':
+                self._tags += [t.strip() for t in m.group(2).split(',')]
+                # Remove entire macro
+                return ''
+            else:
+                return '[Unknown macro: {0}]'.format(macro_name)
+
+        rendered = self.WIKI_RE__MACRO.sub(process_macro, rendered)
 
         def replace_link(m):
             return '<a href="{0}">{1}</a>'.format(m.group(1), m.group(2) if m.group(2) else m.group(1))
