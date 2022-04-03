@@ -354,6 +354,10 @@ class DefaultWikiPage(Wiki):
         self.url_struct = ''
 
     @property
+    def name(self):
+        return 'index'
+
+    @property
     def file_path(self):
         return os.path.join(self.dir_path, self.DEFAULT_WIKI_NAME + self.FILE_EXTENSION)
 
