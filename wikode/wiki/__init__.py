@@ -192,6 +192,8 @@ class Wiki(object):
 
     def index(self):
         """Add/re-add file to search index."""
+        # Render template before indexing
+        self.rendered
         Indexer.index_file(self)
 
     @property

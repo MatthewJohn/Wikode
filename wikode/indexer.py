@@ -33,6 +33,7 @@ class DatabaseFactory(object):
 class Indexer(object):
 
     TABLE_NAME = 'wiki'
+    TAG_TABLE = 'tags'
 
     def initialise_database(self):
         with DatabaseFactory.sql_connect() as db:
@@ -47,6 +48,18 @@ class Indexer(object):
                 c.execute("""
                     CREATE VIRTUAL TABLE wiki
                     USING FTS5(url, file, content);
+                """)
+                return True
+            r = c.execute(
+                """
+                SELECT name FROM sqlite_master WHERE type='table' AND name=?;
+                """,
+                (Indexer.TAG_TABLE,)
+            )
+            if not len(r.fetchall()):
+                c.execute("""
+                    CREATE VIRTUAL TABLE tags
+                    USING FTS5(url, file, tag);
                 """)
                 return True
         return False
@@ -87,4 +100,10 @@ class Indexer(object):
             c.execute(
                 """INSERT INTO wiki(file, url, content) VALUES(?, ?, ?)""",
                 (wiki.file_path, wiki.url_struct, Indexer.escape_invalid_characters(wiki.name + '\n' + wiki.rendered)))
+            c.execute("""DELETE FROM tags WHERE file=?""", (wiki.file_path, ))
+            for tag in wiki.tags:
+                c.execute(
+                    """INSERT INTO tags(file, url, tag) VALUES(?, ?, ?)""",
+                    (wiki.file_path, wiki.url_struct, tag)
+                )
             db.commit()
