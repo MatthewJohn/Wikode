@@ -115,3 +115,13 @@ class Indexer(object):
             c = db.cursor()
             r = c.execute("""SELECT tag FROM tags""")
             return [i[0] for i in r]
+
+    def wikis_by_tag(self, tag_name):
+        """Get wikis based on tags."""
+        with DatabaseFactory.sql_connect() as db:
+            c = db.cursor()
+            r = c.execute(
+                """SELECT url FROM tags WHERE tag=?""",
+                (tag_name,)).fetchall()
+            return [i[0] for i in r]
+

@@ -8,7 +8,7 @@
 <table>
     {% for tag in tags %}
     <tr>
-        <td>{{ tag }}</td>
+        <td><a href='/tags/{{ tag }}'>{{ tag }}</a></td>
     </tr>
     {% endfor %}
 </table>

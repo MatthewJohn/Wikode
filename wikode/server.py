@@ -37,7 +37,8 @@ class Server(object):
 
         self._flask.route(SearchPage.URL, methods=['POST'])(SearchPage.search_post)
 
-        self._flask.route(TagsPage.URL, methods=['GET'])(TagsPage.tags_list_get)
+        self._flask.route(TagsPage.URL, methods=['GET'])(TagsPage.list_tags_get)
+        self._flask.route('{0}/<string:tag>'.format(TagsPage.URL), methods=['GET'])(TagsPage.tag_wikis_get)
 
         self._flask.route('/<path:url_struct>', methods=['GET'])(WikiFactory.serve_wiki_page)
         self._flask.route('/<path:url_struct>', methods=['POST'])(WikiFactory.page_post)

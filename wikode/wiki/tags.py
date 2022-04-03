@@ -14,8 +14,16 @@ class TagsPage(object):
     URL = '/tags'
 
     @staticmethod
-    def tags_list_get():
+    def list_tags_get():
         tags = Indexer().get_all_tags()
 
         return render_template(
             'tags.html', tags=tags)
+
+    @staticmethod
+    def tag_wikis_get(tag):
+        res = [WikiFactory.get_wiki_object_from_url(row)
+               for row in Indexer().wikis_by_tag(tag)]
+
+        return render_template(
+            'tag_results.html', results=res, tag=tag)
