@@ -8,6 +8,7 @@ from wikode.wiki.factory import Factory as WikiFactory
 from wikode.admin import Admin as AdminPage
 from wikode.indexer import Indexer
 from wikode.wiki.search import SearchPage
+from wikode.wiki.tags import TagsPage
 
 
 class Server(object):
@@ -35,6 +36,9 @@ class Server(object):
         self._flask.route(AdminPage.URL, methods=['POST'])(AdminPage.admin_post)
 
         self._flask.route(SearchPage.URL, methods=['POST'])(SearchPage.search_post)
+
+        self._flask.route(TagsPage.URL, methods=['GET'])(TagsPage.list_tags_get)
+        self._flask.route('{0}/<string:tag>'.format(TagsPage.URL), methods=['GET'])(TagsPage.tag_wikis_get)
 
         self._flask.route('/<path:url_struct>', methods=['GET'])(WikiFactory.serve_wiki_page)
         self._flask.route('/<path:url_struct>', methods=['POST'])(WikiFactory.page_post)

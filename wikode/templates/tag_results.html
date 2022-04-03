@@ -1,0 +1,22 @@
+{% extends 'main.html' %}
+
+
+{% block content %}
+
+<h3>Tag: {{ tag }}</h3>
+
+<table>
+    {% for wiki in results %}
+    <tr>
+        <td><a href="{{ wiki.absolute_url }}">{{ wiki.url_struct }}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if not results %}
+<h2>No wkis with tag found</h2>
+
+{% endif %}
+
+
+{% endblock %}
