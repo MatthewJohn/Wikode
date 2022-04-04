@@ -31,8 +31,15 @@ class Wiki(object):
     WIKI_RE__DELETED = re.compile(r'~(.*?)~')
     WIKI_RE__PREFORMATTED = re.compile(r'\{\{\{(.+?)\}\}\}',
                                        re.DOTALL | re.MULTILINE)
-    WIKI_RE__BULLET = re.compile(
+
+    WIKI_RE__MD_BULLET = re.compile(
         r'((?:^ *\*+ [^\n]+$\n)+)',
+        re.DOTALL | re.MULTILINE)
+    WIKI_RE__BULLET = re.compile(
+        r'((?:^ *- [^\n]+$\n)+)',
+        re.DOTALL | re.MULTILINE)
+    WIKI_RE__MULTI_BULLET = re.compile(
+        r'((?:^ *[(?:*+)(?:\d+.)(?:\w.)] [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
     WIKI_RE__LIST = re.compile(
@@ -296,7 +303,7 @@ class Wiki(object):
 
             return ''.join(lines)
 
-        rendered = self.WIKI_RE__BULLET.sub(replace_bullet, rendered)
+        rendered = self.WIKI_RE__MD_BULLET.sub(replace_bullet, rendered)
 
         def replace_list(m):
             lines = []
