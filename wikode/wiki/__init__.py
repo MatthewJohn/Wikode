@@ -253,6 +253,8 @@ class Wiki(object):
                 self._tags += [t.strip() for t in m.group(2).split(',')]
                 # Remove entire macro
                 return ''
+            elif macro_name == 'Image':
+                return '<img src="{}" />'.format(m.group(2))
             else:
                 return '[Unknown macro: {0}]'.format(macro_name)
 
