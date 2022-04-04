@@ -42,6 +42,7 @@ class Wiki(object):
     WIKI_RE__MACRO = re.compile(r'\[\[([A-Za-z]+)\(([^\)]*)\)\]\]')
 
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
+    WIKI_RE__MD_HEADER = re.compile(r'^(#+)([^\n]+?)( #+)?$', re.MULTILINE)
 
     def __init__(self, factory, url_struct):
         self._factory = factory
@@ -263,6 +264,7 @@ class Wiki(object):
             header_size = len(m.group(1))
             return '<h{0}>{1}</h{0}>'.format(header_size, m.group(2))
         rendered = self.WIKI_RE__HEADER.sub(replace_header, rendered)
+        rendered = self.WIKI_RE__MD_HEADER.sub(replace_header, rendered)
 
         def count_bullets(line, current_level):
             points = re.match(r'^([\s\*]+)', line)
