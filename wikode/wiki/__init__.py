@@ -31,8 +31,15 @@ class Wiki(object):
     WIKI_RE__DELETED = re.compile(r'~(.*?)~')
     WIKI_RE__PREFORMATTED = re.compile(r'\{\{\{(.+?)\}\}\}',
                                        re.DOTALL | re.MULTILINE)
-    WIKI_RE__BULLET = re.compile(
+
+    WIKI_RE__MD_BULLET = re.compile(
         r'((?:^ *\*+ [^\n]+$\n)+)',
+        re.DOTALL | re.MULTILINE)
+    WIKI_RE__BULLET = re.compile(
+        r'((?:^ *- [^\n]+$\n)+)',
+        re.DOTALL | re.MULTILINE)
+    WIKI_RE__MULTI_BULLET = re.compile(
+        r'((?:^ *[(?:*+)(?:\d+.)(?:\w.)] [^\n]+$\n)+)',
         re.DOTALL | re.MULTILINE)
 
     WIKI_RE__LIST = re.compile(
@@ -42,6 +49,7 @@ class Wiki(object):
     WIKI_RE__MACRO = re.compile(r'\[\[([A-Za-z]+)\(([^\)]*)\)\]\]')
 
     WIKI_RE__HEADER = re.compile(r'^(=+)([^\n]+?)( =+)?$', re.MULTILINE)
+    WIKI_RE__MD_HEADER = re.compile(r'^(#+)([^\n]+?)( #+)?$', re.MULTILINE)
 
     def __init__(self, factory, url_struct):
         self._factory = factory
@@ -245,6 +253,8 @@ class Wiki(object):
                 self._tags += [t.strip() for t in m.group(2).split(',')]
                 # Remove entire macro
                 return ''
+            elif macro_name == 'Image':
+                return '<img src="{}" />'.format(m.group(2))
             else:
                 return '[Unknown macro: {0}]'.format(macro_name)
 
@@ -263,6 +273,7 @@ class Wiki(object):
             header_size = len(m.group(1))
             return '<h{0}>{1}</h{0}>'.format(header_size, m.group(2))
         rendered = self.WIKI_RE__HEADER.sub(replace_header, rendered)
+        rendered = self.WIKI_RE__MD_HEADER.sub(replace_header, rendered)
 
         def count_bullets(line, current_level):
             points = re.match(r'^([\s\*]+)', line)
@@ -294,7 +305,7 @@ class Wiki(object):
 
             return ''.join(lines)
 
-        rendered = self.WIKI_RE__BULLET.sub(replace_bullet, rendered)
+        rendered = self.WIKI_RE__MD_BULLET.sub(replace_bullet, rendered)
 
         def replace_list(m):
             lines = []
